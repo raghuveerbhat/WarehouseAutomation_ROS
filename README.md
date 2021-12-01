@@ -1,19 +1,19 @@
 # Intelligent Robotics Final Project - Warehouse Automation
 ### Group 5
 
-### IR project environment setup instructions 
+### Project environment setup instructions 
 
-Assuming the initial setup of Ubuntu 20.04 LTS and ROS is done, for this warehouse automation project we are setting up the following packages:
+Assuming the initial setup of Ubuntu 20.04 LTS and ROS Noetic is done, for this warehouse automation project we are setting up the following packages:
 
-##### 1.Setting up AWS Robomaker Small warehouse world (Guide [link](https://www.youtube.com/watch?v=o5Nu2VuYZqA)) :
-- Either download and extract the repo from this [link](https://github.com/aws-robotics/aws-robomaker-small-warehouse-world) in catkin/src/ directory or type the following command by opening terminal.
+##### 1.Setting up AWS Robomaker Small warehouse world (Guide [link](https://www.youtube.com/watch?v=o5Nu2VuYZqA)) 
+- Either download and extract the repo from this [link](https://github.com/aws-robotics/aws-robomaker-small-warehouse-world) in ~/catkin_ws/src/ directory or type the following command by opening terminal.
   ```
-  cd catkin/src
+  cd ~/catkin_ws/src
   git clone https://github.com/aws-robotics/aws-robomaker-small-warehouse-world.git 
   ```
 - Build the package by opening terminal and type commands: 
 ```
-cd catkin
+cd ~/catkin_ws
 catkin_make
 ```
 - Source the workspace by typing following commands:
@@ -46,15 +46,15 @@ sudo apt install ros-noetic-hls-lfcd-lds-driver
 sudo apt install ros-noetic-dynamixel-sdk
 sudo apt install ros-noetic-turtlebot3-msgs
 ```
-- Either download and extract the turtlebot3 repo from the this [link](https://github.com/ROBOTIS-GIT/turtlebot3) and [link](https://github.com/ROBOTIS-GIT/turtlebot3_simulations), in catkin/src/ directory or clone it using following terminal commands
+- Either download and extract the turtlebot3 repo from the this [link](https://github.com/ROBOTIS-GIT/turtlebot3) and [link](https://github.com/ROBOTIS-GIT/turtlebot3_simulations), in ~/catkin_ws/src/ directory or clone it using following terminal commands
 ```
-cd catkin/src 
+cd ~/catkin_ws/src 
 git clone -b noetic-devel https://github.com/ROBOTIS-GIT/turtlebot3.git
 git clone -b noetic-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations
 ```
 - Now building the package with following command
 ```
-cd catkin
+cd ~/catkin_ws
 catkin_make
 ```
 
@@ -74,7 +74,7 @@ sudo apt-get install libignition-physics3-dev
 Change line, from ```<arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/turtlebot3_world.world"/>``` to ```<arg name="world_name" value="$(find aws_robomaker_small_warehouse_world)/worlds/no_roof_small_warehouse.world"/>```  and save the changes.
 - Execute the following command to spawn the robot in the gazebo
 ```
-cd catkin/
+cd ~/catkin_ws/
 export TURTLEBOT3_MODEL=burger
 roslaunch turtlebot3_gazebo turtlebot3_world.launch
 ```
@@ -85,23 +85,23 @@ roslaunch turtlebot3_gazebo turtlebot3_world.launch
 With the robot spawned in the previous step, run the following command to move the robot around the world.
 - Open the terminal
 ```
-cd catkin/
+cd ~/catkin_ws/
 export TURTLEBOT3_MODEL=burger
 roslaunch turtlebot3_teleop turtlebot3_teleop_key.launch
 ```
 Press keys W,A,X,D robot will do the movements and S key to stop the action.
 
 
-##### 5. Building the map on RVIZ and saving.
+##### 5. Building the map on RVIZ and saving
 By moving the robot in the gazebo which has aws small warehouse world, the observation of the robot can be projected on to RVIZ. This projection is the map built by the robot which can be saved for further use.  To do this, execute the following commands 
 ```
-cd catkin/
+cd ~/catkin_ws/
 export TURTLEBOT3_MODEL=burger
 roslaunch turtlebot3_slam turtlebot3_slam.launch
 ```
 By executing above commands, RVIZ loads automatically and with movement of robot the map is built on RVIZ which we can save by executing the following commands
 ```
-cd catkin/
+cd ~/catkin_ws/
 rosrun map_server map_saver -f ~/map
 ```
 
