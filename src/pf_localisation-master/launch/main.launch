@@ -18,12 +18,12 @@
   <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf"  args="-urdf -model turtlebot3_$(arg model) -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description" />
 
 <!-- Turtlebot3 scan publish-->
-  <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
+  <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch" pass_all_args="true">
     <arg name="model" value="$(arg model)" />
   </include>
 
 <!-- Turtlebot3 teleop-->
-  <include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch">
+  <include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch" pass_all_args="true">
     <arg name="model" value="$(arg model)" />
   </include>
 
