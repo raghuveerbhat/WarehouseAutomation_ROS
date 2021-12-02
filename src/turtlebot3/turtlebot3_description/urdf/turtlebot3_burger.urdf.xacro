@@ -161,5 +161,4 @@
                izz="0.001" />
     </inertial>
   </link>
-
 </robot>
