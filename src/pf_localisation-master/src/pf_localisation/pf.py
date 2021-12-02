@@ -40,10 +40,10 @@ class PFLocaliser(PFLocaliserBase):
 		self.estimate_method = EstimatePose(self.center_estimate_method)	# Method of estimation
 		self.error_count = 0
 		self.sensor_model.count = 0
-		self.particle_init_method = 'map'
+		self.particle_init_method = 'normal'
 		self.adaptive_mcl = "fixed_random_particle"		# Toggle random particle spawn
 		if self.adaptive_mcl == "fixed_random_particle":
-			self.random_pts_pct = 15
+			self.random_pts_pct = 0
 		elif self.adaptive_mcl == 'augmented':
 			self.particle_init_method = 'normal'
 			self.num_particles = 750
@@ -106,8 +106,8 @@ class PFLocaliser(PFLocaliserBase):
 									np.random.normal(pos_y, self.random_noise_pos_init),\
 									pos_z)
 				else:
-					new_pos = Point(np.random.normal(self.sensor_model.map_origin_x, self.random_noise_pos_init),\
-									np.random.normal(self.sensor_model.map_origin_x, self.random_noise_pos_init),\
+					new_pos = Point(np.random.normal(pos_x, self.random_noise_pos_init),\
+									np.random.normal(pos_y, self.random_noise_pos_init),\
 									pos_z)
 			elif self.particle_init_method=='uniform':
 				new_pos = Point(np.random.uniform(0, self.sensor_model.map_width * self.sensor_model.map_resolution),\

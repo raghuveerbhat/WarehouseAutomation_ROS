@@ -29,5 +29,20 @@
 
   <!-- Map server -->
   <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+  <node pkg="pf_localisation" name="pf" type="node.py" output="screen"/>
 
+  <!-- Static Transform -->
+  <node pkg="tf" type="static_transform_publisher" name="odom_to_map" args="0 0 0 0 0 0 1 map odom 100" />
+
+  <!-- move_base -->
+  <include file="$(find turtlebot3_navigation)/launch/move_base.launch">
+    <arg name="model" value="$(arg model)" />
+    <arg name="move_forward_only" value="false"/>
+  </include>
+
+  <!-- rviz -->
+  <group if="true">
+    <node pkg="rviz" type="rviz" name="rviz" required="true"
+          args="-d $(find pf_localisation)/rviz/config.rviz"/>
+  </group>
 </launch>
