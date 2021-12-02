@@ -31,19 +31,19 @@ class PFLocaliser(PFLocaliserBase):
 		self.NUMBER_PREDICTED_READINGS = 20     # Number of readings to predict
 		self.random_noise_pos_init = 0.7         # Noise added to position during init
 		self.random_noise_or_init = 360         # Noise added to orientation during init (degree)
-		self.random_noise_pos_update = 0.05	    # Noise added to position during updates
-		self.random_noise_or_update = 20        # Noise added to orienation during updates (degree)
-		self.num_particles = 8000               # Number of particles
-		self.min_particles, self.max_particles = 500, 520               	# Number of particles
+		self.random_noise_pos_update = 0.025	    # Noise added to position during updates
+		self.random_noise_or_update = 10        # Noise added to orienation during updates (degree)
+		self.num_particles = 1000               # Number of particles
+		self.min_particles, self.max_particles = 100, 120               	# Number of particles
 		self.resample_technique = Resample('systematic_resample')    		# Class to handle resampling of data
-		self.center_estimate_method = 'kmeans'
+		self.center_estimate_method = 'weighted'
 		self.estimate_method = EstimatePose(self.center_estimate_method)	# Method of estimation
 		self.error_count = 0
 		self.sensor_model.count = 0
 		self.particle_init_method = 'normal'
 		self.adaptive_mcl = "fixed_random_particle"		# Toggle random particle spawn
 		if self.adaptive_mcl == "fixed_random_particle":
-			self.random_pts_pct = 0
+			self.random_pts_pct = 1
 		elif self.adaptive_mcl == 'augmented':
 			self.particle_init_method = 'normal'
 			self.num_particles = 750
@@ -251,7 +251,6 @@ class PFLocaliser(PFLocaliserBase):
 				q = quaternion_from_euler(roll, pitch, yaw)
 				new_q = Quaternion(q[0], q[1], q[2], q[3])
 				self.particlecloud.poses.append(Pose(new_pos, new_q))
-		print("len: ", len(self.particlecloud.poses))
 
 	def l2_norm(self, actual, current):
 		return np.sum((np.array(actual)-np.array(current))**2)**0.5
@@ -426,6 +425,7 @@ class EstimatePose:
 		AX,AY,AZ,AW = data[:,3], data[:,4], data[:,5], data[:,6]
 		weight_sum = sum(weights)
 		pose = np.sum(data * np.expand_dims(weights,1), axis=0) / weight_sum
+		self.cluster_size = data.shape[0]
 		# new_pos = Point(pose[0],pose[1], pose[2])
 		# new_or = Quaternion(pose[3],pose[4], pose[5], pose[6])
 		# pose = Pose(new_pos, new_or)
