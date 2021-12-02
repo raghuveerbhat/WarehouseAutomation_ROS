@@ -35,10 +35,10 @@
   <node pkg="tf" type="static_transform_publisher" name="odom_to_map" args="0 0 0 0 0 0 1 map odom 100" />
 
   <!-- move_base -->
-  <!-- <include file="$(find turtlebot3_navigation)/launch/move_base.launch">
+  <include file="$(find turtlebot3_navigation)/launch/move_base.launch">
     <arg name="model" value="$(arg model)" />
     <arg name="move_forward_only" value="false"/>
-  </include> -->
+  </include>
 
   <!-- rviz -->
   <group if="true">

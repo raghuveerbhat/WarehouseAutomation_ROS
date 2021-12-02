@@ -1,7 +1,7 @@
 # Intelligent Robotics Final Project - Warehouse Automation
 ### Group 5
 
-### Project environment setup instructions 
+### Project environment setup instructions
 
 Assuming the initial setup of Ubuntu 20.04 LTS and ROS Noetic is done, for this warehouse automation project we are setting up the following packages:
 
@@ -21,6 +21,7 @@ sudo apt-get install ros-noetic-joy ros-noetic-teleop-twist-joy \
 sudo apt install ros-noetic-hls-lfcd-lds-driver
 sudo apt install ros-noetic-dynamixel-sdk
 sudo apt install ros-noetic-turtlebot3-msgs
+sudo apt-get install ros-noetic-navigation
 ```
 **Note** : Run the following commands in case on an error while running catkin_make in the subsequent steps:
 ```
@@ -54,7 +55,7 @@ source devel/setup.bash
 export TURTLEBOT3_MODEL=burger
 roslaunch turtlebot3_gazebo turtlebot3_world.launch
 ```
-**Note**: Now you should be able to see the robot in the gazebo which has aws small warehouse world loaded in it. 
+**Note**: Now you should be able to see the robot in the gazebo which has aws small warehouse world loaded in it.
 
 ##### 5. Moving the robot in gazebo
 - Run the following commands in terminal
@@ -67,7 +68,7 @@ roslaunch turtlebot3_teleop turtlebot3_teleop_key.launch
 **Note**: Press keys W,A,X,D robot will do the movements and S key to stop the action.
 
 ##### 6. Building the map on RVIZ and saving it for future use
-The map for the warehouse can be built by moving the robot around the environment. Run the following commands: 
+The map for the warehouse can be built by moving the robot around the environment. Run the following commands:
 ```
 cd ~/catkin_ws/
 export TURTLEBOT3_MODEL=burger
@@ -83,17 +84,3 @@ rosrun map_server map_saver -f ~/map
 - Setting up AWS Robomaker Small warehouse world (Guide [link](https://www.youtube.com/watch?v=o5Nu2VuYZqA)) and [link](https://github.com/aws-robotics/aws-robomaker-small-warehouse-world)
 - Setting up Turtlebot3 (Guide [link](https://www.youtube.com/watch?v=ji2kQXgCjeM&list=PLRG6WP3c31_XI3wlvHlx2Mp8BYqgqDURU&index=2) and [link](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/))
 - Turtlebot3 repositories [link](https://github.com/ROBOTIS-GIT/turtlebot3) and [link](https://github.com/ROBOTIS-GIT/turtlebot3_simulations)
-
-
-
-
-	
-
-
-
-
-
-
-
-
-
