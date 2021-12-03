@@ -1,0 +1,23 @@
+{"ideal_motion_model": true,
+"odom_rotation_noise":0.1,
+"odom_translation_noise":0.05,
+"odom_drift_noise":0.05,
+
+"num_predicted_readings":20,
+
+"noise_pos_init": 0.7,
+"noise_or_init": 360,
+"noise_pos_update": 0.01,
+"noise_or_update": 5,
+"num_particles": 1000,
+"min_particles": 100,
+"max_particles": 120,
+"random_pts_pct": 10,
+"augmented_mcl_aug_alpha_slow":0.3,
+"augmented_mcl_aug_alpha_fast":0.7,
+
+"mcl_technique": "fixed_random_particle",
+"resample_technique": "systematic_resample",
+"center_estimate_method": "kmeans",
+"particle_init_method": "normal"
+}
