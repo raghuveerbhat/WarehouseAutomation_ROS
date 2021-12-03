@@ -9,7 +9,7 @@
     <arg name="world_name" value="$(find aws_robomaker_small_warehouse_world)/worlds/no_roof_small_warehouse.world"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
-    <arg name="gui" value="true"/>
+    <arg name="gui" value="false"/>
     <arg name="headless" value="false"/>
     <arg name="debug" value="false"/>
   </include>
@@ -23,26 +23,26 @@
   </include>
 
 <!-- Turtlebot3 teleop-->
-  <include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch" pass_all_args="true">
+  <!-- <include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch" pass_all_args="true">
     <arg name="model" value="$(arg model)" />
-  </include>
+  </include> -->
 
   <!-- Map server -->
   <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
   <node pkg="pf_localisation" name="pf" type="node.py" output="screen"/>
 
   <!-- Static Transform -->
-  <node pkg="tf" type="static_transform_publisher" name="odom_to_map" args="0 0 0 0 0 0 1 map odom 100" />
+  <!-- <node pkg="tf" type="static_transform_publisher" name="odom_to_map" args="0 0 0 0 0 0 1 map odom 100" /> -->
 
   <!-- Camera -->
   <!-- <node pkg="cv_camera" type="cv_camera_node" name="cv_camera" output="screen"/>
   <node pkg="tf" type="static_transform_publisher" name="camera_frames_pub" args="0 0 1 0 0 0 /base_link /camera 35"/> -->
 
   <!-- move_base -->
-  <!-- <include file="$(find turtlebot3_navigation)/launch/move_base.launch">
+  <include file="$(find turtlebot3_navigation)/launch/move_base.launch">
     <arg name="model" value="$(arg model)" />
     <arg name="move_forward_only" value="false"/>
-  </include> -->
+  </include>
 
   <!-- rviz -->
   <group if="true">

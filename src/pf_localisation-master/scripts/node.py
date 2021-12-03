@@ -65,7 +65,8 @@ class ParticleFilterLocalisationNode(object):
         self._particle_filter.set_initial_pose(pose)
         self._last_published_pose = deepcopy(self._particle_filter.estimatedpose)
         self._initial_pose_received = True
-        self._cloud_publisher.publish(self._particle_filter.particlecloud)
+        if self._particle_filter.init_flag:
+            self._cloud_publisher.publish(self._particle_filter.particlecloud)
 
     def _odometry_callback(self, odometry):
         """
@@ -88,7 +89,8 @@ class ParticleFilterLocalisationNode(object):
         """
         self._latest_scan = scan
         if self._initial_pose_received:
-            if  self._sufficientMovementDetected(self._particle_filter.estimatedpose):
+            # if  self._sufficientMovementDetected(self._particle_filter.estimatedpose):
+            if  1:
                 # ----- Publish the new pose
                 self._amcl_pose_publisher.publish(self._particle_filter.estimatedpose)
                 estimatedpose =  PoseStamped()

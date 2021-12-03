@@ -31,10 +31,10 @@ class PFLocaliser(PFLocaliserBase):
 		self.NUMBER_PREDICTED_READINGS = 20     # Number of readings to predict
 		self.random_noise_pos_init = 0.7         # Noise added to position during init
 		self.random_noise_or_init = 360         # Noise added to orientation during init (degree)
-		self.random_noise_pos_update = 0.025	    # Noise added to position during updates
-		self.random_noise_or_update = 10        # Noise added to orienation during updates (degree)
+		self.random_noise_pos_update = 0.01	    # Noise added to position during updates
+		self.random_noise_or_update = 5        # Noise added to orienation during updates (degree)
 		self.num_particles = 1000               # Number of particles
-		self.min_particles, self.max_particles = 100, 120               	# Number of particles
+		self.min_particles, self.max_particles = 30, 45              	# Number of particles
 		self.resample_technique = Resample('systematic_resample')    		# Class to handle resampling of data
 		self.center_estimate_method = 'weighted'
 		self.estimate_method = EstimatePose(self.center_estimate_method)	# Method of estimation
@@ -59,6 +59,7 @@ class PFLocaliser(PFLocaliserBase):
 		self.plot_graph = False
 		self.data_list = []
 		self.count = 0
+		self.init_flag=False
 
 	def initialise_particle_cloud(self, initialpose):
 		"""
@@ -75,8 +76,12 @@ class PFLocaliser(PFLocaliserBase):
 			| (geometry_msgs.msg.PoseArray) poses of the particles
 		"""
 		# Initialize data with header
+		self.particlecloud = [Pose()]
+		self.odom_initialised=False
+		new_pos,new_q = None, None
 		self.map_states = []
 		index = 0
+		self.init_flag = False
 		for h in range(0, self.sensor_model.map_height):
 			for w in range(0, self.sensor_model.map_width):
 				if (self.sensor_model.map_data[index] >= 0.0) :
@@ -120,6 +125,7 @@ class PFLocaliser(PFLocaliserBase):
 			q = quaternion_from_euler(roll, pitch, yaw)
 			new_q = Quaternion(q[0], q[1], q[2], q[3])
 			pose.poses.append(Pose(new_pos, new_q))
+		self.init_flag = True
 		return pose
 
 	def calculate_weights(self, scan):
