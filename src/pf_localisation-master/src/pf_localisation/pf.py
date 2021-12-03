@@ -7,6 +7,7 @@ import rospy
 from . util import rotateQuaternion, getHeading
 from random import random
 
+import os
 from time import time
 import copy
 import numpy as np
@@ -33,8 +34,8 @@ class PFLocaliser(PFLocaliserBase):
 		self.random_noise_or_init = 360         # Noise added to orientation during init (degree)
 		self.random_noise_pos_update = 0.01	    # Noise added to position during updates
 		self.random_noise_or_update = 5        # Noise added to orienation during updates (degree)
-		self.num_particles = 1000               # Number of particles
-		self.min_particles, self.max_particles = 30, 45              	# Number of particles
+		self.num_particles = 1000              # Number of particles
+		self.min_particles, self.max_particles = 100, 120              	# Number of particles
 		self.resample_technique = Resample('systematic_resample')    		# Class to handle resampling of data
 		self.center_estimate_method = 'weighted'
 		self.estimate_method = EstimatePose(self.center_estimate_method)	# Method of estimation
@@ -43,11 +44,11 @@ class PFLocaliser(PFLocaliserBase):
 		self.particle_init_method = 'normal'
 		self.adaptive_mcl = "fixed_random_particle"		# Toggle random particle spawn
 		if self.adaptive_mcl == "fixed_random_particle":
-			self.random_pts_pct = 1
+			self.random_pts_pct = 2
 		elif self.adaptive_mcl == 'augmented':
 			self.particle_init_method = 'normal'
-			self.num_particles = 750
-			self.min_particles = 750
+			self.num_particles = 300
+			self.min_particles = 100
 			self.param_aug_w_slow = 0
 			self.param_aug_w_fast = 0
 			self.param_aug_w_avg = 0
@@ -86,8 +87,8 @@ class PFLocaliser(PFLocaliserBase):
 			for w in range(0, self.sensor_model.map_width):
 				if (self.sensor_model.map_data[index] >= 0.0) :
 					p = Point()
-					p.x = w * self.sensor_model.map_resolution
-					p.y = h * self.sensor_model.map_resolution
+					p.x = w * self.sensor_model.map_resolution + self.occupancy_map.info.origin.position.x
+					p.y = h * self.sensor_model.map_resolution + self.occupancy_map.info.origin.position.y
 					p.z = 0
 					self.map_states.append(p)
 				index += 1
@@ -121,6 +122,7 @@ class PFLocaliser(PFLocaliserBase):
 			elif self.particle_init_method=='map':
 				idx = np.random.randint(0, len(self.map_states))
 				new_pos = self.map_states[idx]
+				# print(new_pos)
 			roll, pitch, yaw = 0, 0, np.deg2rad(np.random.uniform(0, self.random_noise_or_init))
 			q = quaternion_from_euler(roll, pitch, yaw)
 			new_q = Quaternion(q[0], q[1], q[2], q[3])
@@ -184,8 +186,8 @@ class PFLocaliser(PFLocaliserBase):
 			self.param_aug_w_slow += self.param_aug_alpha_slow * (self.param_aug_w_avg - self.param_aug_w_slow)
 			self.param_aug_w_fast += self.param_aug_alpha_fast * (self.param_aug_w_avg - self.param_aug_w_fast)
 			self.particles_to_randomize = max(0, 1.0 - self.param_aug_w_fast / self.param_aug_w_slow)
-			if self.particles_to_randomize > 0.25:
-				self.particles_to_randomize = 0.25
+			if self.particles_to_randomize > 0.10:
+				self.particles_to_randomize = 0.10
 			for i in range(int(self.num_particles * self.particles_to_randomize)):
 				random_point = int(np.random.uniform(0, len(self.map_states)-1))
 				random_pos = self.map_states[random_point]
@@ -245,13 +247,8 @@ class PFLocaliser(PFLocaliserBase):
 			if len(self.particlecloud.poses)>=self.max_particles:
 				break
 			else:
-				if (self.particle_init_method == 'uniform') or (self.particle_init_method=='normal'):
-					new_pos = Point(np.random.uniform(0, self.sensor_model.map_width * self.sensor_model.map_resolution),\
-									np.random.uniform(0, self.sensor_model.map_height * self.sensor_model.map_resolution),\
-									0)
-				elif self.particle_init_method == 'map':
-					idx = np.random.randint(0, len(self.map_states))
-					new_pos = self.map_states[idx]
+				idx = np.random.randint(0, len(self.map_states))
+				new_pos = self.map_states[idx]
 
 				roll, pitch, yaw = 0, 0, np.deg2rad(np.random.uniform(0, self.random_noise_or_init))
 				q = quaternion_from_euler(roll, pitch, yaw)
