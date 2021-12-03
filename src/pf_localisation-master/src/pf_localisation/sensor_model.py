@@ -126,7 +126,7 @@ class SensorModel(object):
             map_range = self.calc_map_range(pose.position.x, pose.position.y,
                                      getHeading(pose.orientation) + obs_bearing)
             pz = self.predict(obs_range, map_range)
-            p += pz*pz*pz # Cube probability: reduce low-probability particles 
+            p += pz*pz # Cube probability: reduce low-probability particles 
             
         return p
     

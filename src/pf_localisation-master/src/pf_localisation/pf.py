@@ -37,22 +37,22 @@ class PFLocaliser(PFLocaliserBase):
 		self.num_particles = 1000              # Number of particles
 		self.min_particles, self.max_particles = 100, 120              	# Number of particles
 		self.resample_technique = Resample('systematic_resample')    		# Class to handle resampling of data
-		self.center_estimate_method = 'weighted'
+		self.center_estimate_method = 'kmeans'
 		self.estimate_method = EstimatePose(self.center_estimate_method)	# Method of estimation
 		self.error_count = 0
 		self.sensor_model.count = 0
 		self.particle_init_method = 'normal'
-		self.adaptive_mcl = "fixed_random_particle"		# Toggle random particle spawn
+		self.adaptive_mcl = "augmented"		# Toggle random particle spawn
 		if self.adaptive_mcl == "fixed_random_particle":
 			self.random_pts_pct = 2
 		elif self.adaptive_mcl == 'augmented':
 			self.particle_init_method = 'normal'
-			self.num_particles = 300
+			self.num_particles = 150
 			self.min_particles = 100
 			self.param_aug_w_slow = 0
 			self.param_aug_w_fast = 0
 			self.param_aug_w_avg = 0
-			self.param_aug_alpha_slow = 0.4
+			self.param_aug_alpha_slow = 0.3
 			self.param_aug_alpha_fast = 0.7
 			self.particles_to_randomize = 0
 			self.random_noise_or_init_radians = 2*math.pi
@@ -186,8 +186,8 @@ class PFLocaliser(PFLocaliserBase):
 			self.param_aug_w_slow += self.param_aug_alpha_slow * (self.param_aug_w_avg - self.param_aug_w_slow)
 			self.param_aug_w_fast += self.param_aug_alpha_fast * (self.param_aug_w_avg - self.param_aug_w_fast)
 			self.particles_to_randomize = max(0, 1.0 - self.param_aug_w_fast / self.param_aug_w_slow)
-			if self.particles_to_randomize > 0.10:
-				self.particles_to_randomize = 0.10
+			if self.particles_to_randomize > 0.20:
+				self.particles_to_randomize = 0.20
 			for i in range(int(self.num_particles * self.particles_to_randomize)):
 				random_point = int(np.random.uniform(0, len(self.map_states)-1))
 				random_pos = self.map_states[random_point]
@@ -205,9 +205,15 @@ class PFLocaliser(PFLocaliserBase):
 					new_pos = Point(np.random.normal(pos_x, self.random_noise_pos_update),\
 									np.random.normal(pos_y, self.random_noise_pos_update),\
 									pos_z)
-					orientation = Quaternion(or_x, or_y, or_z, or_w)
-					new_or = rotateQuaternion(orientation,np.random.normal(getHeading(orientation),self.random_noise_or_update_radians)-getHeading(orientation))
-					poses.append(Pose(new_pos, new_or))
+					# Convert quaternions to euler angles for ease of noise parameter tuning
+					# Noise added only to yaw since robot has only 1 axis of rotation
+					roll, pitch, yaw = euler_from_quaternion([or_x, or_y, or_z, or_w])
+					yaw = np.deg2rad(np.random.normal(np.rad2deg(yaw), self.random_noise_or_update))
+
+					# Convert angles back to quaternion form
+					q = quaternion_from_euler(roll, pitch, yaw)
+					new_q = Quaternion(q[0], q[1], q[2], q[3])
+					poses.append(Pose(new_pos, new_q))
 		elif not self.adaptive_mcl == "augmented":
 			for idx in indexes:
 				# Get position and orientation of particle
