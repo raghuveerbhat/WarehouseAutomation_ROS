@@ -213,5 +213,5 @@
     <child link="camera_rgb_optical_frame"/>
   </joint>
   <link name="camera_rgb_optical_frame"/>
-
+ 
 </robot>

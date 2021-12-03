@@ -42,7 +42,7 @@ class PFLocaliser(PFLocaliserBase):
 		self.error_count = 0
 		self.sensor_model.count = 0
 		self.particle_init_method = 'normal'
-		self.adaptive_mcl = "augmented"		# Toggle random particle spawn
+		self.adaptive_mcl = "fixed_random_particle"		# Toggle random particle spawn
 		if self.adaptive_mcl == "fixed_random_particle":
 			self.random_pts_pct = 2
 		elif self.adaptive_mcl == 'augmented':
