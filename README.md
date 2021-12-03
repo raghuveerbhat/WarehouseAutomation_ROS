@@ -84,3 +84,13 @@ rosrun map_server map_saver -f ~/map
 - Setting up AWS Robomaker Small warehouse world (Guide [link](https://www.youtube.com/watch?v=o5Nu2VuYZqA)) and [link](https://github.com/aws-robotics/aws-robomaker-small-warehouse-world)
 - Setting up Turtlebot3 (Guide [link](https://www.youtube.com/watch?v=ji2kQXgCjeM&list=PLRG6WP3c31_XI3wlvHlx2Mp8BYqgqDURU&index=2) and [link](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/))
 - Turtlebot3 repositories [link](https://github.com/ROBOTIS-GIT/turtlebot3) and [link](https://github.com/ROBOTIS-GIT/turtlebot3_simulations)
+
+#### 8. TO DO
+- Add Ground Truth poses
+- Tune parameters for localization
+- Add exploration package for mapping
+- Tune rates for move base
+- Clean and comment code
+- Add config file
+- Add aruco markers to gazebo world
+- Add package for aruco detection and pose estimation, as well as localization using estimated poses
