@@ -23,9 +23,9 @@
   </include>
 
 <!-- Turtlebot3 teleop-->
-  <include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch" pass_all_args="true">
+  <!-- <include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch" pass_all_args="true">
     <arg name="model" value="$(arg model)" />
-  </include>
+  </include> -->
 
   <!-- Map server -->
   <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
