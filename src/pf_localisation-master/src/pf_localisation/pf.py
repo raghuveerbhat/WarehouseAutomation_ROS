@@ -14,7 +14,7 @@ import numpy as np
 from numpy.random import random
 import matplotlib.pyplot as plt
 import json
-
+from pf_localisation.localization import LocalizationTechniques
 
 class PFLocaliser(PFLocaliserBase):
 
@@ -26,9 +26,9 @@ class PFLocaliser(PFLocaliserBase):
 		# Motion model parameters
 		self.ideal_motion_model = self.config['ideal_motion_model']
 		if not self.ideal_motion_model:
-			self.ODOM_ROTATION_NOISE = self.config['odom_rotation_noise	']										# Odometry rotation noise added
-			self.ODOM_TRANSLATION_NOISE = self.config['odom_translation_noise']									# Odometry translation noise added
-			self.ODOM_DRIFT_NOISE = self.config['odom_drift_noise']											# Odometry drift noise added
+			self.ODOM_ROTATION_NOISE = self.config['odom_rotation_noise	']											# Odometry rotation noise added
+			self.ODOM_TRANSLATION_NOISE = self.config['odom_translation_noise']										# Odometry translation noise added
+			self.ODOM_DRIFT_NOISE = self.config['odom_drift_noise']													# Odometry drift noise added
 
 		# Sensor model parameters
 		self.NUMBER_PREDICTED_READINGS = self.config['num_predicted_readings'] 										# Number of readings to predict
@@ -36,14 +36,14 @@ class PFLocaliser(PFLocaliserBase):
 		# Particle initialization Parameters
 		self.noise_pos_init, self.noise_or_init = self.config['noise_pos_init'], self.config['noise_or_init']		# Noise added to position during init
 		self.noise_pos_update, self.noise_or_update = self.config['noise_pos_update'], self.config['noise_or_update'] # Noise added to position during update
-		self.num_particles = self.config['num_particles']           											# Total Number of particles initialized
-		self.min_particles, self.max_particles = self.config['num_particles'], self.config['num_particles']           # Min and max number of particles during update
-		self.particle_init_method = self.config['particle_init_method']											# Method of initialization of particles
+		self.num_particles = self.config['num_particles']           												# Total Number of particles initialized
+		self.min_particles, self.max_particles = self.config['num_particles'], self.config['num_particles']         # Min and max number of particles during update
+		self.particle_init_method = self.config['particle_init_method']												# Method of initialization of particles
 		self.mcl_technique = self.config['mcl_technique']															# Technique of localization to run
 		self.resample_technique = Resample(self.config['resample_technique'])    									# Class to handle resampling of data
-		self.center_estimate_method = self.config['center_estimate_method']										# Method of estimating pose
-		self.estimate_method = EstimatePose(self.center_estimate_method)										# Class to estimate pose
-		self.random_pts_pct = self.config['random_pts_pct']														# Percentage of random points to add
+		self.center_estimate_method = self.config['center_estimate_method']											# Method of estimating pose
+		self.estimate_method = EstimatePose(self.center_estimate_method)											# Class to estimate pose
+		self.random_pts_pct = self.config['random_pts_pct']															# Percentage of random points to add
 		# self.error_count = 0
 		self.sensor_model.count = 0
 		if self.mcl_technique == 'augmented':
@@ -58,6 +58,7 @@ class PFLocaliser(PFLocaliserBase):
 		self.data_list = []
 		self.count = 0
 		self.init_flag=False
+		self.loc_tech = LocalizationTechniques(self.config, self.sensor_model, self.occupancy_map)
 
 	def initialise_particle_cloud(self, initialpose):
 		"""
@@ -73,57 +74,10 @@ class PFLocaliser(PFLocaliserBase):
 		:Return:
 			| (geometry_msgs.msg.PoseArray) poses of the particles
 		"""
-		# Initialize data with header
 		self.particlecloud = [Pose()]
 		self.odom_initialised=False
-		new_pos,new_q = None, None
-		self.map_states = []
-		index = 0
 		self.init_flag = False
-		for h in range(0, self.sensor_model.map_height):
-			for w in range(0, self.sensor_model.map_width):
-				if (self.sensor_model.map_data[index] >= 0.0) :
-					p = Point()
-					p.x = w * self.sensor_model.map_resolution + self.occupancy_map.info.origin.position.x
-					p.y = h * self.sensor_model.map_resolution + self.occupancy_map.info.origin.position.y
-					p.z = 0
-					self.map_states.append(p)
-				index += 1
-
-		pose = PoseArray()
-		pose.header = initialpose.header
-
-		# Get position and orientation of initial mouse click on rviz
-		pos = initialpose.pose.pose.position
-		orientation = initialpose.pose.pose.orientation
-		pos_x, pos_y, pos_z = pos.x, pos.y, pos.z
-		or_x, or_y, or_z, or_w = orientation.x, orientation.y, orientation.z, orientation.w
-
-		# Create N particles around initial mouse click with random noise
-		# Noise is added along x and y dimensions of position (2d robot)
-		# Noise is added in degrees only to yaw, since robot has only 1 axis of rotation
-		for i in range(self.num_particles):
-			if self.particle_init_method=='normal':
-				if self.mcl_technique == 'augmented':
-					new_pos = Point(np.random.normal(pos_x, self.noise_pos_init),\
-									np.random.normal(pos_y, self.noise_pos_init),\
-									pos_z)
-				else:
-					new_pos = Point(np.random.normal(pos_x, self.noise_pos_init),\
-									np.random.normal(pos_y, self.noise_pos_init),\
-									pos_z)
-			elif self.particle_init_method=='uniform':
-				new_pos = Point(np.random.uniform(0, self.sensor_model.map_width * self.sensor_model.map_resolution),\
-								np.random.uniform(0, self.sensor_model.map_height * self.sensor_model.map_resolution),\
-								pos_z)
-			elif self.particle_init_method=='map':
-				idx = np.random.randint(0, len(self.map_states))
-				new_pos = self.map_states[idx]
-				# print(new_pos)
-			roll, pitch, yaw = 0, 0, np.deg2rad(np.random.uniform(0, self.noise_or_init))
-			q = quaternion_from_euler(roll, pitch, yaw)
-			new_q = Quaternion(q[0], q[1], q[2], q[3])
-			pose.poses.append(Pose(new_pos, new_q))
+		pose = self.loc_tech.initialize_point_cloud(initialpose)
 		self.init_flag = True
 		return pose
 
@@ -137,8 +91,7 @@ class PFLocaliser(PFLocaliserBase):
 		"""
 		# Calculate weights of each particle based on observation
 		weights = []
-		self.data = []
-		self.param_aug_w_avg = 0
+		aug_w_avg = 0
 		for i, pose in enumerate(self.particlecloud.poses):
 			wt = self.sensor_model.get_weight(scan, pose)
 			weights.append(wt)
@@ -146,15 +99,12 @@ class PFLocaliser(PFLocaliserBase):
 			orientation = self.particlecloud.poses[i].orientation
 			pos_x, pos_y, pos_z = pos.x, pos.y, pos.z
 			or_x, or_y, or_z, or_w = orientation.x, orientation.y, orientation.z, orientation.w
-			self.data.append([pos_x, pos_y, pos_z, or_x, or_y, or_z, or_w])
-			if self.mcl_technique == 'augmented':
-				self.param_aug_w_avg += wt / self.num_particles
-		# Normalize weights
+			aug_w_avg += wt
+		if self.loc_tech.mcl_technique == 'augmented':
+			# self.loc_tech.param_aug_w_avg = (aug_w_avg / len(self.particlecloud.poses))
+			self.loc_tech.param_aug_w_avg = (aug_w_avg / self.loc_tech.num_particles)
 		weights = np.array(weights)
 		weights/=weights.sum()
-
-		self.normalized_weights = copy.deepcopy(weights) / np.max(copy.deepcopy(weights))
-
 		return weights
 
 	def update_particle_cloud(self, scan):
@@ -166,83 +116,12 @@ class PFLocaliser(PFLocaliserBase):
 			| scan (sensor_msgs.msg.LaserScan): laser scan to use for update
 
 		"""
+		self.resampled_data, self.resampled_weights = [], []
 		self.current_scan = copy.deepcopy(scan)
-		# Compute normalized weights for each particle
 		self.weights = self.calculate_weights(self.current_scan)
-		# print(np.mean(weight_temp), np.std(weight_temp))
-		# Resample particles using weight distribution
 		indexes = self.resample_technique.resample(self.weights)
-		# Update each particle by adding noise, and resampling using indexes,
-		# obtained with systematic resampling
-		poses, new_idxs = [], []
-		self.mean_weight, self.std_weight = np.mean(self.weights), np.std(self.weights)
-		removed_count = 0
-
-		if self.mcl_technique == "augmented":
-			random_particles = []
-			self.param_aug_w_slow += self.param_aug_alpha_slow * (self.param_aug_w_avg - self.param_aug_w_slow)
-			self.param_aug_w_fast += self.param_aug_alpha_fast * (self.param_aug_w_avg - self.param_aug_w_fast)
-			self.particles_to_randomize = max(0, 1.0 - self.param_aug_w_fast / self.param_aug_w_slow)
-			if self.particles_to_randomize > (self.random_pts_pct/100):
-				self.particles_to_randomize = (self.random_pts_pct/100)
-			for i in range(int(self.num_particles * self.particles_to_randomize)):
-				random_point = int(np.random.uniform(0, len(self.map_states)-1))
-				random_pos = self.map_states[random_point]
-				random_or = rotateQuaternion(self.particlecloud.poses[0].orientation,np.random.uniform(0,2*math.pi))
-				random_particles.append(Pose(random_pos,random_or))
-			for idx in indexes:
-				# Get position and orientation of particle
-				pos_x, pos_y, pos_z = self.data[idx][0], self.data[idx][1], self.data[idx][2]
-				or_x, or_y, or_z, or_w = self.data[idx][3], self.data[idx][4], self.data[idx][5], self.data[idx][6]
-				new_idxs.append(idx)
-				if len(random_particles) != 0 and np.random.random_sample() > (1 - self.particles_to_randomize):
-					random_pose = random_particles.pop()
-					poses.append(random_pose)
-				else:
-					new_pos = Point(np.random.normal(pos_x, self.noise_pos_update),\
-									np.random.normal(pos_y, self.noise_pos_update),\
-									pos_z)
-					# Convert quaternions to euler angles for ease of noise parameter tuning
-					# Noise added only to yaw since robot has only 1 axis of rotation
-					roll, pitch, yaw = euler_from_quaternion([or_x, or_y, or_z, or_w])
-					yaw = np.deg2rad(np.random.normal(np.rad2deg(yaw), self.noise_or_update))
-
-					# Convert angles back to quaternion form
-					q = quaternion_from_euler(roll, pitch, yaw)
-					new_q = Quaternion(q[0], q[1], q[2], q[3])
-					poses.append(Pose(new_pos, new_q))
-		elif not self.mcl_technique == "augmented":
-			for idx in indexes:
-				# Get position and orientation of particle
-				if (self.weights[idx] < self.mean_weight - self.std_weight) and (self.weights.shape[0]-removed_count > self.min_particles):
-					removed_count+=1
-				else:
-					new_idxs.append(idx)
-					pos_x, pos_y, pos_z = self.data[idx][0], self.data[idx][1], self.data[idx][2]
-					or_x, or_y, or_z, or_w = self.data[idx][3], self.data[idx][4], self.data[idx][5], self.data[idx][6]
-					# Add small noise to the particles x and y dimension (2D robot)
-					new_pos = Point(np.random.normal(pos_x, self.noise_pos_update),\
-									np.random.normal(pos_y, self.noise_pos_update),\
-									pos_z)
-
-					# Convert quaternions to euler angles for ease of noise parameter tuning
-					# Noise added only to yaw since robot has only 1 axis of rotation
-					roll, pitch, yaw = euler_from_quaternion([or_x, or_y, or_z, or_w])
-					yaw = np.deg2rad(np.random.normal(np.rad2deg(yaw), self.noise_or_update))
-
-					# Convert angles back to quaternion form
-					q = quaternion_from_euler(roll, pitch, yaw)
-					new_q = Quaternion(q[0], q[1], q[2], q[3])
-					poses.append(Pose(new_pos, new_q))
-
-		# Update poses with new particles
-		self.particlecloud.poses = copy.deepcopy(poses)
-		self.data = np.array(self.data)[new_idxs]
-		self.normalized_weights = np.array(self.normalized_weights)[new_idxs]
-		# Recalculate weights with updated poses for weighted averaging
-		if self.center_estimate_method == 'weighted':
-			self.weights = self.calculate_weights(self.current_scan)
-			self.data = np.array(self.data)
+		self.updated_poses, self.updated_data, self.resampled_data, self.resampled_weights = self.loc_tech.update_particle_cloud(self.weights, indexes, self.particlecloud)
+		print(self.resampled_weights.shape)
 
 	def add_random_points(self, percentage=15):
 		particles_to_add = percentage*0.01 * self.estimate_method.cluster_size
@@ -250,8 +129,8 @@ class PFLocaliser(PFLocaliserBase):
 			if len(self.particlecloud.poses)>=self.max_particles:
 				break
 			else:
-				idx = np.random.randint(0, len(self.map_states))
-				new_pos = self.map_states[idx]
+				idx = np.random.randint(0, len(self.loc_tech.map_states))
+				new_pos = self.loc_tech.map_states[idx]
 
 				roll, pitch, yaw = 0, 0, np.deg2rad(np.random.uniform(0, self.random_noise_or_init))
 				q = quaternion_from_euler(roll, pitch, yaw)
@@ -277,28 +156,19 @@ class PFLocaliser(PFLocaliserBase):
 		:Return:
 			| (geometry_msgs.msg.Pose) robot's estimated pose.
 		 """
-		if self.data.shape[0]>0:
-			pose_ = self.estimate_method.update(self.data, self.normalized_weights)
-			# print("STATS:", self.estimate_method.cur_stats)
-		else:
-			pose_ = [0,0,0,0,0,0,0]
-		# Create Ros Pose data type
-		new_pos = Point(pose_[0],pose_[1], pose_[2])
-		new_or = Quaternion(pose_[3],pose_[4], pose_[5], pose_[6])
-		pose = Pose(new_pos, new_or)
+
+		estimated_pose = self.estimate_method.update(self.resampled_data, self.resampled_weights)
+		self.particlecloud.poses = copy.deepcopy(self.loc_tech.create_random_particles(self.updated_poses))
 		if self.plot_graph:
 			true_pos_x = self.last_odom_pose.pose.pose.position.x + self.sensor_model.map_origin_x
 			true_pos_y = self.last_odom_pose.pose.pose.position.y + self.sensor_model.map_origin_y
 			true_pos_z = self.last_odom_pose.pose.pose.position.z
-
 			or_l1_error = abs(getHeading(new_or) - getHeading(self.last_odom_pose.pose.pose.orientation))
 			l2_dist = self.l2_norm([pose_[0], pose_[1], pose_[2]], [true_pos_x, true_pos_x, true_pos_z])
 			self.data_list.append([or_l1_error, l2_dist])
 			if self.count%100 == 0:
 				np.save("weighted.npy",np.array(self.data_list))
-		if self.mcl_technique == "fixed_random_particle":
-			self.add_random_points(percentage=self.random_pts_pct)
-		return pose
+		return estimated_pose
 
 class Resample:
 	def __init__(self, method='systematic_resample'):
@@ -400,16 +270,29 @@ class K_Means:
 		self.mean_dist[self.itr] = np.mean(np.array(self.dist).reshape(-1,1))
 
 class EstimatePose:
-	def __init__(self, method):
+	def __init__(self, method, sliding_window=5):
 		self.method = method
+		self.past_poses = []
+		self.sliding_window = sliding_window
+
+	def get_mean_pose(self, pose):
+		self.past_poses.append(pose)
+		if len(self.past_poses) > self.sliding_window:
+			self.past_poses.pop(0)
+		mean_pose = np.mean(self.past_poses, axis=0)
+		return mean_pose
 
 	def update(self, data, weights=None):
-		pose = None
+		pose = [0,0,0,0,0,0,0]
 		if self.method=='weighted':
 			pose = self.estimate_pose_weighted(data, weights)
 		elif self.method=='kmeans':
 			pose = self.estimate_pose_kmeans(data, weights)
-		return pose
+		weighted_pose = self.get_mean_pose(pose)
+		new_pos = Point(weighted_pose[0], weighted_pose[1], weighted_pose[2])
+		new_or = Quaternion(weighted_pose[3], weighted_pose[4], weighted_pose[5], weighted_pose[6])
+		estimated_pose = Pose(new_pos, new_or)
+		return estimated_pose
 
 	def estimate_pose_weighted(self, data, weights):
 		"""
@@ -432,9 +315,6 @@ class EstimatePose:
 		weight_sum = sum(weights)
 		pose = np.sum(data * np.expand_dims(weights,1), axis=0) / weight_sum
 		self.cluster_size = data.shape[0]
-		# new_pos = Point(pose[0],pose[1], pose[2])
-		# new_or = Quaternion(pose[3],pose[4], pose[5], pose[6])
-		# pose = Pose(new_pos, new_or)
 		return pose
 
 	def estimate_pose_kmeans(self, data, weights):

@@ -9,15 +9,15 @@
 "noise_or_init": 360,
 "noise_pos_update": 0.01,
 "noise_or_update": 5,
-"num_particles": 1000,
+"num_particles": 200,
 "min_particles": 100,
 "max_particles": 120,
 "random_pts_pct": 10,
 "augmented_mcl_aug_alpha_slow":0.3,
 "augmented_mcl_aug_alpha_fast":0.7,
 
-"mcl_technique": "fixed_random_particle",
+"mcl_technique": "augmented",
 "resample_technique": "systematic_resample",
-"center_estimate_method": "kmeans",
+"center_estimate_method": "weighted",
 "particle_init_method": "normal"
 }
