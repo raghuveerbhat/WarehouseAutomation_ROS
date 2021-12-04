@@ -33,32 +33,16 @@ class PFLocaliser(PFLocaliserBase):
 		# Sensor model parameters
 		self.NUMBER_PREDICTED_READINGS = self.config['num_predicted_readings'] 										# Number of readings to predict
 
-		# Particle initialization Parameters
-		self.noise_pos_init, self.noise_or_init = self.config['noise_pos_init'], self.config['noise_or_init']		# Noise added to position during init
-		self.noise_pos_update, self.noise_or_update = self.config['noise_pos_update'], self.config['noise_or_update'] # Noise added to position during update
-		self.num_particles = self.config['num_particles']           												# Total Number of particles initialized
-		self.min_particles, self.max_particles = self.config['num_particles'], self.config['num_particles']         # Min and max number of particles during update
-		self.particle_init_method = self.config['particle_init_method']												# Method of initialization of particles
+		# # Particle initialization Parameters
 		self.mcl_technique = self.config['mcl_technique']															# Technique of localization to run
 		self.resample_technique = Resample(self.config['resample_technique'])    									# Class to handle resampling of data
 		self.center_estimate_method = self.config['center_estimate_method']											# Method of estimating pose
 		self.estimate_method = EstimatePose(self.center_estimate_method)											# Class to estimate pose
-		self.random_pts_pct = self.config['random_pts_pct']															# Percentage of random points to add
-		# self.error_count = 0
-		self.sensor_model.count = 0
-		if self.mcl_technique == 'augmented':
-			self.param_aug_w_slow = 0
-			self.param_aug_w_fast = 0
-			self.param_aug_w_avg = 0
-			self.param_aug_alpha_slow = self.config['augmented_mcl_aug_alpha_slow']
-			self.param_aug_alpha_fast = self.config['augmented_mcl_aug_alpha_fast']
-			self.particles_to_randomize = 0
 
 		self.plot_graph = False
 		self.data_list = []
 		self.count = 0
 		self.init_flag=False
-		self.loc_tech = LocalizationTechniques(self.config, self.sensor_model, self.occupancy_map)
 
 	def initialise_particle_cloud(self, initialpose):
 		"""
@@ -74,6 +58,7 @@ class PFLocaliser(PFLocaliserBase):
 		:Return:
 			| (geometry_msgs.msg.PoseArray) poses of the particles
 		"""
+		self.loc_tech = LocalizationTechniques(self.config, self.sensor_model, self.occupancy_map)
 		self.particlecloud = [Pose()]
 		self.odom_initialised=False
 		self.init_flag = False
@@ -101,7 +86,6 @@ class PFLocaliser(PFLocaliserBase):
 			or_x, or_y, or_z, or_w = orientation.x, orientation.y, orientation.z, orientation.w
 			aug_w_avg += wt
 		if self.loc_tech.mcl_technique == 'augmented':
-			# self.loc_tech.param_aug_w_avg = (aug_w_avg / len(self.particlecloud.poses))
 			self.loc_tech.param_aug_w_avg = (aug_w_avg / self.loc_tech.num_particles)
 		weights = np.array(weights)
 		weights/=weights.sum()
@@ -122,20 +106,6 @@ class PFLocaliser(PFLocaliserBase):
 		indexes = self.resample_technique.resample(self.weights)
 		self.updated_poses, self.updated_data, self.resampled_data, self.resampled_weights = self.loc_tech.update_particle_cloud(self.weights, indexes, self.particlecloud)
 		print(self.resampled_weights.shape)
-
-	def add_random_points(self, percentage=15):
-		particles_to_add = percentage*0.01 * self.estimate_method.cluster_size
-		for i in range(int(particles_to_add)):
-			if len(self.particlecloud.poses)>=self.max_particles:
-				break
-			else:
-				idx = np.random.randint(0, len(self.loc_tech.map_states))
-				new_pos = self.loc_tech.map_states[idx]
-
-				roll, pitch, yaw = 0, 0, np.deg2rad(np.random.uniform(0, self.random_noise_or_init))
-				q = quaternion_from_euler(roll, pitch, yaw)
-				new_q = Quaternion(q[0], q[1], q[2], q[3])
-				self.particlecloud.poses.append(Pose(new_pos, new_q))
 
 	def l2_norm(self, actual, current):
 		return np.sum((np.array(actual)-np.array(current))**2)**0.5

@@ -104,6 +104,7 @@ class LocalizationTechniques():
 			if self.particles_to_randomize > (self.random_pts_pct/100):
 				self.particles_to_randomize = self.random_pts_pct/100
 			num_particles_to_add = int(len(poses) * self.particles_to_randomize)
+			print("RANDOM_PARTICLES: ", num_particles_to_add)
 			random_particles = self.generate_random_poses(num_particles_to_add)
 			if random_particles.shape[0]>0:
 				poses = np.concatenate((poses[:-num_particles_to_add], random_particles), axis=0)

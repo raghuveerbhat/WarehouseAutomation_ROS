@@ -33,11 +33,11 @@ class PFLocaliserBase(object):
 
     def __init__(self):
         # ----- Initialise fields
+        self.map_set = False
         self.estimatedpose =  PoseWithCovarianceStamped()
         self.occupancy_map = OccupancyGrid()
         self.particlecloud =  PoseArray()
         self.tf_message = tfMessage()
-
         self._update_lock =  Lock()
 
         # ----- Parameters
@@ -280,3 +280,4 @@ class PFLocaliserBase(object):
         rospy.loginfo("Particle filter got map. (Re)initialising.")
         self.particlecloud = self.initialise_particle_cloud(self.estimatedpose)
         self.particlecloud.header.frame_id = "map"
+        self.map_set=True
