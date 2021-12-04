@@ -17,18 +17,17 @@ import json
 
 class LocalizationTechniques():
 	def __init__(self, config, sensor_model, occupancy_map):
+		# Particle initialization Parameters
 		self.config = config
 		self.sensor_model = sensor_model
 		self.occupancy_map = occupancy_map
-		# Particle initialization Parameters
-		self.noise_pos_init, self.noise_or_init = self.config['noise_pos_init'], self.config['noise_or_init']		# Noise added to position during init
-		self.noise_pos_update, self.noise_or_update = self.config['noise_pos_update'], self.config['noise_or_update'] # Noise added to position during update
-		self.num_particles = self.config['num_particles']           											# Total Number of particles initialized
-		self.min_particles, self.max_particles = self.config['min_particles'], self.config['max_particles']           # Min and max number of particles during update
-		self.particle_init_method = self.config['particle_init_method']											# Method of initialization of particles
-		self.mcl_technique = self.config['mcl_technique']															# Technique of localization to run
-		self.random_pts_pct = self.config['random_pts_pct']														# Percentage of random points to add
-		# self.error_count = 0
+		self.noise_pos_init, self.noise_or_init = self.config['noise_pos_init'], self.config['noise_or_init']			# Noise added to position during init
+		self.noise_pos_update, self.noise_or_update = self.config['noise_pos_update'], self.config['noise_or_update'] 	# Noise added to position during update
+		self.num_particles = self.config['num_particles']           													# Total Number of particles initialized
+		self.min_particles, self.max_particles = self.config['min_particles'], self.config['max_particles']           	# Min and max number of particles during update
+		self.particle_init_method = self.config['particle_init_method']													# Method of initialization of particles
+		self.mcl_technique = self.config['mcl_technique']																# Technique of localization to run
+		self.random_pts_pct = self.config['random_pts_pct']																# Percentage of random points to add
 		self.sensor_model.count = 0
 		if self.mcl_technique == 'augmented':
 			self.param_aug_w_slow = 0
@@ -62,10 +61,7 @@ class LocalizationTechniques():
 		self.create_map_states()						# Create map states
 		pose = PoseArray()								# Create pose array
 		pose.header = initialpose.header				# Initialize header from received input
-		pos = initialpose.pose.pose.position			# Get position
-		orientation = initialpose.pose.pose.orientation	# Get Orientation
-		pos_x, pos_y, pos_z = pos.x, pos.y, pos.z
-		or_x, or_y, or_z, or_w = orientation.x, orientation.y, orientation.z, orientation.w
+		pos_x, pos_y, pos_z, or_x, or_y, or_z, or_w = self.return_state_from_pose(copy.deepcopy(initialpose).pose.pose)
 		for i in range(self.num_particles):
 			if self.particle_init_method=='normal':		# Initialize particles position  using normal distribution
 					new_pos = Point(np.random.normal(pos_x, self.noise_pos_init),\
@@ -104,7 +100,7 @@ class LocalizationTechniques():
 			if self.particles_to_randomize > (self.random_pts_pct/100):
 				self.particles_to_randomize = self.random_pts_pct/100
 			num_particles_to_add = int(len(poses) * self.particles_to_randomize)
-			print("RANDOM_PARTICLES: ", num_particles_to_add)
+			# print("RANDOM_PARTICLES: ", self.param_aug_w_fast / self.param_aug_w_slow)
 			random_particles = self.generate_random_poses(num_particles_to_add)
 			if random_particles.shape[0]>0:
 				poses = np.concatenate((poses[:-num_particles_to_add], random_particles), axis=0)
@@ -137,12 +133,12 @@ class LocalizationTechniques():
 			updated_poses.append(updated_pose)
 		if (self.mcl_technique=='augmented'):
 			# print(resampled_weights)
-			resampled_weights /= max(resampled_weights)		# Normalize the weights to use for estimated pose
-			sorted_ids = resampled_weights.argsort()[::-1]		# Sort the data according to maximum weights
-			updated_poses = np.array(updated_poses)[sorted_ids]			# Sort the data according to maximum weights
+			resampled_weights /= max(resampled_weights)						# Normalize the weights to use for estimated pose
+			sorted_ids = resampled_weights.argsort()[::-1]					# Sort the data according to maximum weights
+			updated_poses = np.array(updated_poses)[sorted_ids]				# Sort the data according to maximum weights
 			updated_data = np.array(updated_data)[sorted_ids]				# Sort the data according to maximum weights
 			resampled_data = np.array(resampled_data)[sorted_ids]			# Sort the data according to maximum weights
-			resampled_weights = np.array(resampled_weights)[sorted_ids]	# Sort the data according to maximum weights
+			resampled_weights = np.array(resampled_weights)[sorted_ids]		# Sort the data according to maximum weights
 
 		if (self.mcl_technique=='fixed_random_particle') and (len(updated_poses) > self.max_particles):	# Remove extra particles
 			mean, std = np.mean(resampled_weights), np.std(resampled_weights)

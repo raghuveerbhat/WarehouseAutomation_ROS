@@ -26,8 +26,6 @@ class ParticleFilterLocalisationNode(object):
         # ----- Minimum change (m/radians) before publishing new particle cloud and pose
         self._PUBLISH_DELTA = rospy.get_param("publish_delta", 0.1)
 
-        self._particle_filter = pf_localisation.pf.PFLocaliser()
-
         self._latest_scan = None
         self._last_published_pose = None
         self._initial_pose_received = False
@@ -48,6 +46,7 @@ class ParticleFilterLocalisationNode(object):
         rospy.loginfo("Map received. %d X %d, %f px/m." %
                       (ocuccupancy_map.info.width, ocuccupancy_map.info.height,
                        ocuccupancy_map.info.resolution))
+        self._particle_filter = pf_localisation.pf.PFLocaliser()
         self._particle_filter.set_map(ocuccupancy_map)
 
         self._laser_subscriber = rospy.Subscriber("/scan", LaserScan,

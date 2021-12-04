@@ -43,6 +43,8 @@ class PFLocaliser(PFLocaliserBase):
 		self.data_list = []
 		self.count = 0
 		self.init_flag=False
+		self.map_set = False
+
 
 	def initialise_particle_cloud(self, initialpose):
 		"""
@@ -60,8 +62,7 @@ class PFLocaliser(PFLocaliserBase):
 		"""
 		self.loc_tech = LocalizationTechniques(self.config, self.sensor_model, self.occupancy_map)
 		self.particlecloud = [Pose()]
-		self.odom_initialised=False
-		self.init_flag = False
+		self.odom_initialised, self.init_flag = False, False
 		pose = self.loc_tech.initialize_point_cloud(initialpose)
 		self.init_flag = True
 		return pose
@@ -76,7 +77,7 @@ class PFLocaliser(PFLocaliserBase):
 		"""
 		# Calculate weights of each particle based on observation
 		weights = []
-		aug_w_avg = 0
+		self.loc_tech.param_aug_w_avg = 0
 		for i, pose in enumerate(self.particlecloud.poses):
 			wt = self.sensor_model.get_weight(scan, pose)
 			weights.append(wt)
@@ -84,9 +85,8 @@ class PFLocaliser(PFLocaliserBase):
 			orientation = self.particlecloud.poses[i].orientation
 			pos_x, pos_y, pos_z = pos.x, pos.y, pos.z
 			or_x, or_y, or_z, or_w = orientation.x, orientation.y, orientation.z, orientation.w
-			aug_w_avg += wt
-		if self.loc_tech.mcl_technique == 'augmented':
-			self.loc_tech.param_aug_w_avg = (aug_w_avg / self.loc_tech.num_particles)
+			if self.loc_tech.mcl_technique == 'augmented':
+				self.loc_tech.param_aug_w_avg += (wt / self.loc_tech.num_particles)
 		weights = np.array(weights)
 		weights/=weights.sum()
 		return weights
@@ -105,7 +105,7 @@ class PFLocaliser(PFLocaliserBase):
 		self.weights = self.calculate_weights(self.current_scan)
 		indexes = self.resample_technique.resample(self.weights)
 		self.updated_poses, self.updated_data, self.resampled_data, self.resampled_weights = self.loc_tech.update_particle_cloud(self.weights, indexes, self.particlecloud)
-		print(self.resampled_weights.shape)
+		self.particlecloud.poses = copy.deepcopy(self.loc_tech.create_random_particles(self.updated_poses))
 
 	def l2_norm(self, actual, current):
 		return np.sum((np.array(actual)-np.array(current))**2)**0.5
@@ -128,7 +128,6 @@ class PFLocaliser(PFLocaliserBase):
 		 """
 
 		estimated_pose = self.estimate_method.update(self.resampled_data, self.resampled_weights)
-		self.particlecloud.poses = copy.deepcopy(self.loc_tech.create_random_particles(self.updated_poses))
 		if self.plot_graph:
 			true_pos_x = self.last_odom_pose.pose.pose.position.x + self.sensor_model.map_origin_x
 			true_pos_y = self.last_odom_pose.pose.pose.position.y + self.sensor_model.map_origin_y

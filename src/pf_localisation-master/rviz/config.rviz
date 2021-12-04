@@ -6,7 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /Path2
+        - /PoseArray1
       Splitter Ratio: 0.5
     Tree Height: 478
   - Class: rviz/Selection
@@ -58,7 +58,7 @@ Visualization Manager:
       Axes Length: 0.30000001192092896
       Axes Radius: 0.009999999776482582
       Class: rviz/PoseArray
-      Color: 0; 255; 0
+      Color: 117; 80; 123
       Enabled: true
       Head Length: 0.07000000029802322
       Head Radius: 0.029999999329447746
@@ -272,7 +272,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 6.863049507141113
+      Distance: 18.605905532836914
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -280,17 +280,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 1.9193962812423706
-        Y: -2.007763147354126
-        Z: -0.183143749833107
+        X: 0.4917733371257782
+        Y: -2.331106424331665
+        Z: -0.36836957931518555
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.4547964334487915
+      Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
-      Yaw: 3.208570718765259
+      Yaw: 3.168569803237915
     Saved: ~
 Window Geometry:
   Displays:

@@ -16,8 +16,8 @@
 "augmented_mcl_aug_alpha_slow":0.3,
 "augmented_mcl_aug_alpha_fast":0.7,
 
-"mcl_technique": "augmented",
+"particle_init_method": "normal",
 "resample_technique": "systematic_resample",
 "center_estimate_method": "weighted",
-"particle_init_method": "map"
+"mcl_technique": "augmented"
 }
