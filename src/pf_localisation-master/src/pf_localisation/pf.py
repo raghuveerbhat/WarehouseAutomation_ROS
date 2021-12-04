@@ -44,7 +44,8 @@ class PFLocaliser(PFLocaliserBase):
 		self.count = 0
 		self.init_flag=False
 		self.map_set = False
-
+		self.weight_hist = []
+		self.low_weight_count = 0
 
 	def initialise_particle_cloud(self, initialpose):
 		"""

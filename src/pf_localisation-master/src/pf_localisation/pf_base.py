@@ -107,7 +107,7 @@ class PFLocaliserBase(object):
             self.update_particle_cloud(scan)
             self.particlecloud.header.frame_id = "map"
             self.estimatedpose.pose.pose = self.estimate_pose()
-            currentTime = rospy.Time.now() + rospy.Duration(0.5)
+            currentTime = rospy.Time.now() + rospy.Duration(1)
 
             # ----- Given new estimated pose, now work out the new transform
             self.recalculate_transform(currentTime)
