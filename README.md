@@ -85,7 +85,15 @@ rosrun map_server map_saver -f ~/map
 - Setting up Turtlebot3 (Guide [link](https://www.youtube.com/watch?v=ji2kQXgCjeM&list=PLRG6WP3c31_XI3wlvHlx2Mp8BYqgqDURU&index=2) and [link](https://emanual.robotis.com/docs/en/platform/turtlebot3/quick-start/))
 - Turtlebot3 repositories [link](https://github.com/ROBOTIS-GIT/turtlebot3) and [link](https://github.com/ROBOTIS-GIT/turtlebot3_simulations)
 
-#### 8. TO DO
+##### 8. Launching turtlebot3 in the warehouse+aruco environment:
+```
+cd ~/catkin_ws/
+source devel/setup.bash
+export GAZEBO_MODEL_PATH= Here add the path to directory"gazebo_aruco_box-master"
+roslaunch pf_localisation main.launch
+```
+
+#### 9. TO DO
 - Add Ground Truth poses
 - Tune parameters for localization
 - Add exploration package for mapping
