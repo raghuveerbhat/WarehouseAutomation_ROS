@@ -3,11 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-devel/
+
 
 # Distribution / packaging
 .Python
 build/
+devel/
 develop-eggs/
 dist/
 downloads/
