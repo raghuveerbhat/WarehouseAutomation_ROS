@@ -131,17 +131,17 @@ class PFLocaliser(PFLocaliserBase):
 
 		estimated_pose = self.estimate_method.update(self.resampled_data, self.resampled_weights)
 		pos_x, pos_y = estimated_pose.position.x, estimated_pose.position.y
-		grid_x = int((pos_x - self.occupancy_map.info.origin.position.x) / self.occupancy_map.info.resolution)
-		grid_y = int((pos_y - self.occupancy_map.info.origin.position.y) / self.occupancy_map.info.resolution)
-		# print(grid_x, grid_y)
-		test_img = np.array(self.occupancy_map.data).reshape(self.sensor_model.map_height, self.sensor_model.map_width)
-		test_img[np.where(test_img==0)]=0
-		test_img[np.where(test_img==-1)]=255
-		test_img[np.where(test_img==100)]=255
-		test_img = test_img.astype(np.uint8)
-		test_img = cv2.rectangle(test_img, (grid_x-5, grid_y-5), (grid_x+5, grid_y+5), 255, 1)
-		cv2.imshow("# TODO: ",test_img)
-		cv2.waitKey(1)
+		# grid_x = int((pos_x - self.occupancy_map.info.origin.position.x) / self.occupancy_map.info.resolution)
+		# grid_y = int((pos_y - self.occupancy_map.info.origin.position.y) / self.occupancy_map.info.resolution)
+		# # print(grid_x, grid_y)
+		# test_img = np.array(self.occupancy_map.data).reshape(self.sensor_model.map_height, self.sensor_model.map_width)
+		# test_img[np.where(test_img==0)]=0
+		# test_img[np.where(test_img==-1)]=255
+		# test_img[np.where(test_img==100)]=255
+		# test_img = test_img.astype(np.uint8)
+		# test_img = cv2.rectangle(test_img, (grid_x-5, grid_y-5), (grid_x+5, grid_y+5), 255, 1)
+		# cv2.imshow("# TODO: ",test_img)
+		# cv2.waitKey(1)
 
 		if self.plot_graph:
 			true_pos_x = self.last_odom_pose.pose.pose.position.x + self.sensor_model.map_origin_x
