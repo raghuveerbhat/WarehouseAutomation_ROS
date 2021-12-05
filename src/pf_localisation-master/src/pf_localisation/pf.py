@@ -3,10 +3,8 @@ from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from . pf_base import PFLocaliserBase
 import math
 import rospy
-
 from . util import rotateQuaternion, getHeading
 from random import random
-
 import os
 from time import time
 import copy
@@ -14,6 +12,9 @@ import numpy as np
 from numpy.random import random
 import matplotlib.pyplot as plt
 import json
+import cv2
+
+
 from pf_localisation.localization import LocalizationTechniques
 
 class PFLocaliser(PFLocaliserBase):
@@ -129,6 +130,19 @@ class PFLocaliser(PFLocaliserBase):
 		 """
 
 		estimated_pose = self.estimate_method.update(self.resampled_data, self.resampled_weights)
+		pos_x, pos_y = estimated_pose.position.x, estimated_pose.position.y
+		grid_x = int((pos_x - self.occupancy_map.info.origin.position.x) / self.occupancy_map.info.resolution)
+		grid_y = int((pos_y - self.occupancy_map.info.origin.position.y) / self.occupancy_map.info.resolution)
+		# print(grid_x, grid_y)
+		test_img = np.array(self.occupancy_map.data).reshape(self.sensor_model.map_height, self.sensor_model.map_width)
+		test_img[np.where(test_img==0)]=0
+		test_img[np.where(test_img==-1)]=255
+		test_img[np.where(test_img==100)]=255
+		test_img = test_img.astype(np.uint8)
+		test_img = cv2.rectangle(test_img, (grid_x-5, grid_y-5), (grid_x+5, grid_y+5), 255, 1)
+		cv2.imshow("# TODO: ",test_img)
+		cv2.waitKey(1)
+
 		if self.plot_graph:
 			true_pos_x = self.last_odom_pose.pose.pose.position.x + self.sensor_model.map_origin_x
 			true_pos_y = self.last_odom_pose.pose.pose.position.y + self.sensor_model.map_origin_y

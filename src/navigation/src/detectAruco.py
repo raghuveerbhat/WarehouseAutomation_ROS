@@ -97,15 +97,15 @@ class ArucoDetector():
 
             try:
                 cv_img = self.bridge.imgmsg_to_cv2(img_msg, "bgr8")
+                cv_img = cv2.flip(cv_img, 1)
 
             except cv_bridge.CvBridgeError as e:
                 rospy.loginfo(e)
             gray_img = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
-            gray_img = gray_img.T
             corners, ids, reg = aruco.detectMarkers(image=gray_img, dictionary=ARUCO_DICT, parameters=ARUCO_PARAMETERS)
             # corners, ids, _ = aruco.detectMarkers(gray_img, ARUCO_DICT, parameters=ARUCO_PARAMETERS)
-            if len(corners)>0:
-                print(corners, ids)
+            # if len(corners)>0:
+                # print(corners, ids)
 
             rvecs, tvecs, _ = aruco.estimatePoseSingleMarkers(corners, ARUCO_SQUARE_SIZE, self.CAMERA_MATRIX, self.DISTORTION_COEFFICIENTS)
 
@@ -135,10 +135,10 @@ class ArucoDetector():
             # end1 = int(reg[0][0][2][0])
             # end2 = int(reg[0][0][2][1])
             # img = cv2.rectangle(gray_img, (start1,start2), (end1,end2), (128,127,127), 5)
-            # cv2.imshow("frame",img)
-            # k = cv2.waitKey(1)
-            # if k == ord("q"):
-            #     exit(1)
+            cv2.imshow("frame",test_img)
+            k = cv2.waitKey(1)
+            if k == ord("q"):
+                exit(1)
             # rosified_test_img = self.bridge.cv2_to_imgmsg(test_img, encoding="bgr8")
             # self.marker_list.detected = self.marker_list_status
             # self.marker_image_pub.publish(rosified_test_img)

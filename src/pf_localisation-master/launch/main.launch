@@ -6,7 +6,8 @@
   <arg name="map_file" default="$(find aws_robomaker_small_warehouse_world)/maps/005/map.yaml"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find aws_robomaker_small_warehouse_world)/worlds/no_roof_small_warehouse_witharuco.world"/>
+    <!-- <arg name="world_name" value="$(find aws_robomaker_small_warehouse_world)/worlds/no_roof_small_warehouse_witharuco.world"/> -->
+    <arg name="world_name" value="$(find aws_robomaker_small_warehouse_world)/worlds/world_with_markers.world"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui" value="false"/>
@@ -34,7 +35,7 @@
   <node pkg="pf_localisation" name="pf" type="node.py" output="screen"/>
 
   <!-- Aruco detection -->
-  <node pkg="pf_localisation" name="aruco" type="detectAruco.py" output="screen"/>
+  <node pkg="navigation" name="aruco" type="detectAruco.py" output="screen"/>
 
   <!-- Static Transform -->
   <!-- <node pkg="tf" type="static_transform_publisher" name="odom_to_map" args="0 0 0 0 0 0 1 map odom " /> -->
@@ -44,11 +45,11 @@
   <node pkg="tf" type="static_transform_publisher" name="camera_frames_pub" args="0 0 1 0 0 0 /base_link /camera 35"/> -->
 
   <!-- move_base -->
-  <include file="$(find turtlebot3_navigation)/launch/move_base.launch">
+  <!-- <include file="$(find turtlebot3_navigation)/launch/move_base.launch">
     <arg name="model" value="$(arg model)" />
     <arg name="move_forward_only" value="false"/>
-  </include>
-  
+  </include> -->
+
   <!-- rviz -->
   <group if="true">
     <node pkg="rviz" type="rviz" name="rviz" required="true"

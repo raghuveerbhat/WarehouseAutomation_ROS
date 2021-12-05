@@ -1,3 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
 <sdf version='1.7'>
   <world name='default'>
     <gravity>0 0 -9.8</gravity>
@@ -2638,28 +2639,6 @@
           <pose>0 0 0 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='turtlebot3_burger'>
-        <pose>-2.00932 -0.494064 0.033222 -1.8e-05 0.00773 0.643915</pose>
-        <scale>1 1 1</scale>
-        <link name='base_footprint'>
-          <pose>-2.00932 -0.494064 0.033222 -1.8e-05 0.00773 0.643915</pose>
-          <velocity>-1.3e-05 1.2e-05 2.1e-05 6.2e-05 -8e-05 0.000267</velocity>
-          <acceleration>-0 0 -0 0 -0 2e-06</acceleration>
-          <wrench>-0 0 -0 0 -0 0</wrench>
-        </link>
-        <link name='wheel_left_link'>
-          <pose>-2.05714 -0.42993 0.066221 -1.52283 -1.55682 0.59595</pose>
-          <velocity>-3.2e-05 -5e-06 1e-06 -8.8e-05 -0.000252 0.000262</velocity>
-          <acceleration>-0 -0 0 -2e-06 -0 3e-06</acceleration>
-          <wrench>-0 -0 0 0 -0 0</wrench>
-        </link>
-        <link name='wheel_right_link'>
-          <pose>-1.96109 -0.557891 0.066223 -1.54025 1.54886 0.674448</pose>
-          <velocity>3e-06 2.1e-05 1e-06 -0.000253 -3.8e-05 0.000273</velocity>
-          <acceleration>0 0 0 0 -3e-06 3e-06</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
