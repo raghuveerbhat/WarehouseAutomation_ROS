@@ -19,5 +19,5 @@
 "particle_init_method": "normal",
 "resample_technique": "systematic_resample",
 "center_estimate_method": "weighted",
-"mcl_technique": "fixed_random_technique"
+"mcl_technique": "augmented"
 }
