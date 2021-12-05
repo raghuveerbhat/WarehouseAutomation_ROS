@@ -6,7 +6,7 @@
   <arg name="map_file" default="$(find aws_robomaker_small_warehouse_world)/maps/005/map.yaml"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find aws_robomaker_small_warehouse_world)/worlds/no_roof_small_warehouse.world"/>
+    <arg name="world_name" value="$(find aws_robomaker_small_warehouse_world)/worlds/no_roof_small_warehouse_witharuco.world"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui" value="false"/>
@@ -23,13 +23,18 @@
   </include>
 
 <!-- Turtlebot3 teleop-->
-  <!-- <include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch" pass_all_args="true">
+  <include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch" pass_all_args="true">
     <arg name="model" value="$(arg model)" />
-  </include> -->
+  </include>
 
   <!-- Map server -->
   <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+
+  <!-- Localization -->
   <node pkg="pf_localisation" name="pf" type="node.py" output="screen"/>
+
+  <!-- Aruco detection -->
+  <node pkg="pf_localisation" name="aruco" type="detectAruco.py" output="screen"/>
 
   <!-- Static Transform -->
   <!-- <node pkg="tf" type="static_transform_publisher" name="odom_to_map" args="0 0 0 0 0 0 1 map odom " /> -->
@@ -43,7 +48,7 @@
     <arg name="model" value="$(arg model)" />
     <arg name="move_forward_only" value="false"/>
   </include>
-
+  
   <!-- rviz -->
   <group if="true">
     <node pkg="rviz" type="rviz" name="rviz" required="true"
