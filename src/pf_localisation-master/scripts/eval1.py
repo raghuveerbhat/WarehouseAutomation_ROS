@@ -38,7 +38,7 @@ class ParticleFilterLocalisationNodeEval(object):
         self.interval = []
         self.groundtruthList = []
         self.counter = 0
-        self.landmarks = [[1.4473416805267334, 0.41364067792892456, 0.0, 0.0, 0.0, -0.011503674603633503, 0.9999338305461085],
+        self.landmark = [[1.4473416805267334, 0.41364067792892456, 0.0, 0.0, 0.0, -0.011503674603633503, 0.9999338305461085],
                             [1.0017170906066895, -1.3638901710510254, 0.0, 0.0, 0.0, 0.010521600528978107, 0.9999446464291454],
                             [0.9813948273658752, -3.1724913120269775, 0.0, 0.0, 0.0, 0.0013030230571348166, 0.999999151065096],
                             [0.9532657861709595, -4.968116283416748, 0.0, 0.0, 0.0, -0.0022372289058545302, 0.9999974974002799],      
@@ -76,38 +76,38 @@ class ParticleFilterLocalisationNodeEval(object):
                         oerror=round(((yaw-yaw1)**2),4)
                         self.Orientation_error.append(oerror)
                         if path_id==1:
-                            roll1, pitch1, yaw1 = euler_from_quaternion([landmark[path_id-1][3],landmark[path_id-1][4],landmark[path_id-1][5],landmark[path_id-1][6]])
-                            perror=round(((((self.estimatedPose.pose.position.x-landmark[path_id-1][0])**2)+((self.estimatedPose.pose.position.y-landmark[path_id-1][1])**2))/2),4)    
+                            roll1, pitch1, yaw1 = euler_from_quaternion([self.landmark[path_id-1][3],self.landmark[path_id-1][4],self.landmark[path_id-1][5],self.landmark[path_id-1][6]])
+                            perror=round(((((self.estimatedPose.pose.position.x-self.landmark[path_id-1][0])**2)+((self.estimatedPose.pose.position.y-self.landmark[path_id-1][1])**2))/2),4)    
                             oerror=round(((yaw-yaw1)**2),4)
                             self.pose_error1.append(perror)
                             self.Orientation_error1.append(oerror)
                         elif path_id==2:
-                            roll1, pitch1, yaw1 = euler_from_quaternion([landmark[path_id-1][3],landmark[path_id-1][4],landmark[path_id-1][5],landmark[path_id-1][6]])
-                            perror=round(((((self.estimatedPose.pose.position.x-landmark[path_id-1][0])**2)+((self.estimatedPose.pose.position.y-landmark[path_id-1][1])**2))/2),4)   
+                            roll1, pitch1, yaw1 = euler_from_quaternion([self.landmark[path_id-1][3],self.landmark[path_id-1][4],self.landmark[path_id-1][5],self.landmark[path_id-1][6]])
+                            perror=round(((((self.estimatedPose.pose.position.x-self.landmark[path_id-1][0])**2)+((self.estimatedPose.pose.position.y-self.landmark[path_id-1][1])**2))/2),4)  
                             oerror=round(((yaw-yaw1)**2),4)
                             self.pose_error2.append(perror)
                             self.Orientation_error2.append(oerror)
                         elif path_id==3:
-                            roll1, pitch1, yaw1 = euler_from_quaternion([landmark[path_id-1][3],landmark[path_id-1][4],landmark[path_id-1][5],landmark[path_id-1][6]])
-                            perror=round(((((self.estimatedPose.pose.position.x-landmark[path_id-1][0])**2)+((self.estimatedPose.pose.position.y-landmark[path_id-1][1])**2))/2),4)      
+                            roll1, pitch1, yaw1 = euler_from_quaternion([self.landmark[path_id-1][3],self.landmark[path_id-1][4],self.landmark[path_id-1][5],self.landmark[path_id-1][6]])
+                            perror=round(((((self.estimatedPose.pose.position.x-self.landmark[path_id-1][0])**2)+((self.estimatedPose.pose.position.y-self.landmark[path_id-1][1])**2))/2),4)      
                             oerror=round(((yaw-yaw1)**2),4)
                             self.pose_error3.append(perror)
                             self.Orientation_error3.append(oerror)
                         elif path_id==4:
-                            roll1, pitch1, yaw1 = euler_from_quaternion([landmark[path_id-1][3],landmark[path_id-1][4],landmark[path_id-1][5],landmark[path_id-1][6]])
-                            perror=round(((((self.estimatedPose.pose.position.x-landmark[path_id-1][0])**2)+((self.estimatedPose.pose.position.y-landmark[path_id-1][1])**2))/2),4)    
+                            roll1, pitch1, yaw1 = euler_from_quaternion([self.landmark[path_id-1][3],self.landmark[path_id-1][4],self.landmark[path_id-1][5],self.landmark[path_id-1][6]])
+                            perror=round(((((self.estimatedPose.pose.position.x-self.landmark[path_id-1][0])**2)+((self.estimatedPose.pose.position.y-self.landmark[path_id-1][1])**2))/2),4)    
                             oerror=round(((yaw-yaw1)**2),4)
                             self.pose_error4.append(perror)
                             self.Orientation_error4.append(oerror)
                         elif path_id==5:
-                            roll1, pitch1, yaw1 = euler_from_quaternion([landmark[path_id-1][3],landmark[path_id-1][4],landmark[path_id-1][5],landmark[path_id-1][6]])
-                            perror=round(((((self.estimatedPose.pose.position.x-landmark[path_id-1][0])**2)+((self.estimatedPose.pose.position.y-landmark[path_id-1][1])**2))/2),4)    
+                            roll1, pitch1, yaw1 = euler_from_quaternion([self.landmark[path_id-1][3],self.landmark[path_id-1][4],self.landmark[path_id-1][5],self.landmark[path_id-1][6]])
+                            perror=round(((((self.estimatedPose.pose.position.x-self.landmark[path_id-1][0])**2)+((self.estimatedPose.pose.position.y-self.landmark[path_id-1][1])**2))/2),4)   
                             oerror=round(((yaw-yaw1)**2),4)
                             self.pose_error5.append(perror)
                             self.Orientation_error5.append(oerror)
                         elif path_id==6:
-                            roll1, pitch1, yaw1 = euler_from_quaternion([landmark[path_id-1][3],landmark[path_id-1][4],landmark[path_id-1][5],landmark[path_id-1][6]])
-                            perror=round(((((self.estimatedPose.pose.position.x-landmark[path_id-1][0])**2)+((self.estimatedPose.pose.position.y-landmark[path_id-1][1])**2))/2),4)      
+                            roll1, pitch1, yaw1 = euler_from_quaternion([self.landmark[path_id-1][3],self.landmark[path_id-1][4],self.landmark[path_id-1][5],self.landmark[path_id-1][6]])
+                            perror=round(((((self.estimatedPose.pose.position.x-self.landmark[path_id-1][0])**2)+((self.estimatedPose.pose.position.y-self.landmark[path_id-1][1])**2))/2),4)      
                             oerror=round(((yaw-yaw1)**2),4)
                             self.pose_error6.append(perror)
                             self.Orientation_error6.append(oerror)
