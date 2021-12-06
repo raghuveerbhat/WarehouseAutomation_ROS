@@ -7,7 +7,7 @@ import time
 class NavigationStack():
 	def __init__(self):
 		rospy.set_param('path_id', 0)
-		rospy.set_param('completed', false)
+		rospy.set_param('completed', False)
 		self.client = actionlib.SimpleActionClient('/move_base', MoveBaseAction)
 		rospy.loginfo("Waiting for move base server")
 		self.client.wait_for_server()
@@ -53,7 +53,7 @@ class NavigationStack():
 			print("GOAL {} REACHED".format(i))
 			while (not rospy.is_shutdown()) and (rospy.get_param('aruco_operation') == 1):
 				print("WAITING FOR ARUCO TO SET PARAM")
-			rospy.set_param('completed', true)
+			rospy.set_param('completed', True)
 			print("ARUCO OPERATION COMPLETED")
 
 			
