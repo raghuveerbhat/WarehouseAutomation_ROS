@@ -134,11 +134,17 @@ class LocalizationTechniques():
 		if (self.mcl_technique=='augmented'):
 			# print(resampled_weights)
 			resampled_weights /= max(resampled_weights)						# Normalize the weights to use for estimated pose
+			# sorted_ids = resampled_weights.argsort()[::-1]					# Sort the data according to maximum weights
+			# updated_poses = np.array(updated_poses)[sorted_ids]				# Sort the data according to maximum weights
+			# updated_data = np.array(updated_data)[sorted_ids]				# Sort the data according to maximum weights
+			# resampled_data = np.array(resampled_data)[sorted_ids]			# Sort the data according to maximum weights
+			# resampled_weights = np.array(resampled_weights)[sorted_ids]		# Sort the data according to maximum weights
 			sorted_ids = resampled_weights.argsort()[::-1]					# Sort the data according to maximum weights
-			updated_poses = np.array(updated_poses)[sorted_ids]				# Sort the data according to maximum weights
-			updated_data = np.array(updated_data)[sorted_ids]				# Sort the data according to maximum weights
-			resampled_data = np.array(resampled_data)[sorted_ids]			# Sort the data according to maximum weights
-			resampled_weights = np.array(resampled_weights)[sorted_ids]		# Sort the data according to maximum weights
+			updated_poses = np.array(updated_poses)			# Sort the data according to maximum weights
+			updated_data = np.array(updated_data)				# Sort the data according to maximum weights
+			resampled_data = np.array(resampled_data)			# Sort the data according to maximum weights
+			resampled_weights = np.array(resampled_weights)		# Sort the data according to maximum weights
+			resampled_weights /= max(resampled_weights)						# Normalize the weights to use for estimated pose
 
 		if (self.mcl_technique=='fixed_random_particle') and (len(updated_poses) > self.max_particles):	# Remove extra particles
 			mean, std = np.mean(resampled_weights), np.std(resampled_weights)
