@@ -14,7 +14,7 @@ from geometry_msgs.msg import Twist
 
 class ArucoNav():
     def __init__(self):
-        self.kP = 0.001
+        self.kP = 0.5
         self.target = 90
         self.rotate_angle = 90
         self.count = 0
@@ -24,12 +24,15 @@ class ArucoNav():
         self.aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_250)
         self.aruco_parameters = cv2.aruco.DetectorParameters_create()
         self.bridge = cv_bridge.CvBridge()
-        rospy.set_param('aruco_operation', 0)
         self.count = 0
+        self.yaw_deg = 0
+        rospy.set_param('aruco_operation', 0)
+        self.rate = rospy.Rate(30)
         self.odom_sub = rospy.Subscriber("/odom", Odometry, self.get_odom)
-        self.control_pub = rospy.Publisher("/cmd_vel", Twist, self.rotate_robot)
+        self.control_pub = rospy.Publisher("/cmd_vel", Twist, self.rotate_robot, queue_size=10)
         self.image_sub = rospy.Subscriber('/camera/rgb/image_raw', Image, callback=self.image_callback)
         self.caminfo_sub = rospy.Subscriber('/camera/rgb/camera_info', CameraInfo, callback=self.caminfo_callback)
+        self.main_process()
 
     def caminfo_callback(self, caminfo_msg):
         if self.received_cam_intrinsics:
@@ -53,15 +56,24 @@ class ArucoNav():
         self.yaw = np.rad2deg(self.yaw)
 
     def rotate_robot(self, angle_error):
-        control_command = Twist()
-        if abs(angle_error) > self.thresh:
-            print(angle_error)
-            control_command.angular.z = self.kP * angle_error
-            self.control_pub.publish(control_command)
-        else:
-            rospy.set_param('aruco_operation', 0)
-            self.control_pub.publish(control_command)
-            print("COMPLETED")
+        if rospy.get_param('/aruco_operation') == 1:    # Turn only if robot is at the rack landmark
+            control_command = Twist()
+            if abs(angle_error) > self.thresh:
+                angle_error = np.deg2rad(angle_error)
+                print(self.kP * angle_error)
+                control_command.angular.z = self.kP * angle_error
+                self.control_pub.publish(control_command)
+            else:
+                control_command.angular.x = 0
+                control_command.angular.y = 0
+                control_command.angular.z = 0
+                self.control_pub.publish(control_command)
+                self.control_pub.publish(control_command)
+                self.control_pub.publish(control_command)
+                time.sleep(1)
+                rospy.set_param('aruco_operation', 0)
+                path_id = rospy.set_param('/path_id', 0)
+                print("COMPLETED ARUCO OPERATION")
 
     def corner_fix(self, corner):
         corner = np.array(corner)[0]
@@ -83,23 +95,24 @@ class ArucoNav():
             if rospy.has_param('/path_id'):
                 path_id = rospy.get_param('/path_id')
                 if (len(corners) > 0) and (path_id > 0):
-                    rospy.set_param('aruco_operation', 1)
                     if path_id in ids:
+                        rospy.set_param('aruco_operation', 1)   # Indicate we need to start turning based on aruco marker error
                         idx = np.where(ids==path_id)[0][0]
                         corner, rvec, tvec = corners[idx], rvecs[idx], tvecs[idx] 
                         corner = self.corner_fix(corner)
                         img = cv2.aruco.drawDetectedMarkers(img, [corner])
-                        # img = cv2.aruco.drawAxis(img, self.cam_matrix, self.dist_coeff, rvec, tvec, self.marker_size)
-                        yaw = 1 * math.atan2(tvecs[idx][0][0], tvecs[idx][0][2])
-                        yaw = yaw / math.pi * 180
-                        zDist = math.sqrt(tvec[0][0] ** 2 + tvec[0][1] ** 2 + tvec[0][2] ** 2)
-                        self.rotate_robot(yaw)
-                        cv2.putText(img, "%d tag - %.2f cm - %.2f deg" % (idx, (zDist * 100), yaw), tuple(corner[0][1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0))
-                        
+                        self.yaw_deg = np.rad2deg(1 * math.atan2(tvecs[idx][0][0], tvecs[idx][0][2]))
+                        self.dist = math.sqrt(tvec[0][0] ** 2 + tvec[0][1] ** 2 + tvec[0][2] ** 2)
+                        cv2.putText(img, "%d tag - %.2f cm - %.2f deg" % (idx, (self.dist * 100), self.yaw_deg), tuple(corner[0][1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0))
             cv2.imshow("frame",img)
             k = cv2.waitKey(1)
             if k == ord("q"):
                 exit(1)
+
+    def main_process(self):
+        while not rospy.is_shutdown():
+            self.rotate_robot(self.yaw_deg)
+            self.rate.sleep()
 
 if __name__ == '__main__':
     rospy.init_node("ArucoNav")
