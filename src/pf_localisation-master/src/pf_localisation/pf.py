@@ -253,8 +253,117 @@ class K_Means:
 				self.max_idx = i
 		self.mean_dist[self.itr] = np.mean(np.array(self.dist).reshape(-1,1))
 
+
+class DBScan:
+	def __init__(self, data, weights, eps=0.7, minPts=3):
+		self.particles = data
+		self.weights = weights
+
+		self.eps = eps
+		self.minPts = minPts
+		self.max_clusture_idx = 1
+		self.total_clustures = 1
+		self.clustures = None
+		# Update self.clustures by forming clustures using DBScan method
+		self.formClustures()
+		self.max_density_cluster_pose = self.getMeanPose()
+
+
+	def checkAndGetNeigbours(self, index):
+	
+		neighbours = set()
+		#check available points within radius
+		for i in range(0, len(self.particles)):
+			dx = self.particles[i][0] - self.particles[index][0]
+			dy = self.particles[i][1] - self.particles[index][1]
+			dist = math.sqrt(math.pow(dx,2) + math.pow(dy,2))
+			# Check if the point lies inside the neighbourhood circle with radius = self.eps
+			if(dist < self.eps):
+				neighbours.add(i)
+
+		#check how many points are present within radius
+		if len(neighbours) >= self.minPts:
+			#return format (dataframe, is_core, is_border, is_noise)
+			return (neighbours , True, False, False)
+		
+		elif (len(neighbours) < self.minPts) and len(neighbours) > 0:
+			#return format (dataframe, is_core, is_border, is_noise)
+			return (neighbours , False, True, False)
+		
+		elif len(neighbours) == 0:
+			#return format (dataframe, is_core, is_border, is_noise)
+			return (neighbours , False, False, True)
+
+	def formClustures(self):
+		current_stack = set()
+		unvisited = list(range(0, len(self.particles)))
+		#initilize with having 1 clusture, here clusters[0] is for noise and can be called as noise cluster
+		c_idx = 1
+		clusters = [[],[]]
+		#Iterate over all unvisited points
+		while (len(unvisited) != 0):
+
+			first_point = True
+			#choose a random unvisited point
+			current_stack.add(np.random.choice(unvisited))
+			#Iterate over all points considered in the cluster
+			while len(current_stack) != 0:
+
+				curr_idx = current_stack.pop()
+				#check if point is core, border or noise and get the neigbour indexes specified within self.eps radius
+				neigh_indexes, iscore, isborder, isnoise = self.checkAndGetNeigbours(curr_idx)
+				
+				#dealing with an edge case
+				if (isborder & first_point):
+					#If first point is border then we can put it under noise
+					clusters[0].extend([curr_idx])
+					clusters[0].extend(neigh_indexes)
+					unvisited.remove(curr_idx)
+					unvisited = [e for e in unvisited if e not in neigh_indexes]
+					continue
+					
+				unvisited.remove(curr_idx)
+				#Consider only unvisited points
+				neigh_indexes = set(neigh_indexes) & set(unvisited)
+				
+				if iscore:
+					#if current point is a core then assign to cluster and add neigbours to stack
+					first_point = False
+					clusters[c_idx].extend([curr_idx])
+					current_stack.update(neigh_indexes)
+				elif isborder: 
+					#if current point is a border point then assign to cluster and dont add its neigbours to stack
+					clusters[c_idx].extend([curr_idx])
+					continue
+				elif isnoise:
+					#if current point is noise then add the point in noise cluster
+					clusters[0].extend([curr_idx])
+					continue
+					
+			if not first_point:
+				if len(clusters[c_idx]) > len(clusters[self.max_clusture_idx]):
+					self.max_clusture_idx = c_idx
+				# Increment the cluster number
+				c_idx+=1
+				clusters.append([])
+
+		if len(clusters[-1]) == 0:
+			# If all the cluster points is considered as noise
+			clusters.pop(-1)
+
+		self.clustures = clusters
+		self.total_clustures = len(self.clustures) - 1
+		if self.total_clustures == 0:
+			self.max_clusture_idx = 0
+
+	def getMeanPose(self):
+		poseList = []
+		for idx in self.clustures[self.max_clusture_idx]:
+			poseList.append(self.particles[idx])
+		return np.mean(np.array(poseList),axis=0)
+
 class EstimatePose:
-	def __init__(self, method, sliding_window=5):
+	def __init__(self, method, sliding_window=4):
 		self.method = method
 		self.past_poses = []
 		self.sliding_window = sliding_window
@@ -272,6 +381,8 @@ class EstimatePose:
 			pose = self.estimate_pose_weighted(data, weights)
 		elif self.method=='kmeans':
 			pose = self.estimate_pose_kmeans(data, weights)
+		elif self.method=='dbscan':
+			pose = self.estimate_pose_dbscan(data, weights)	
 		weighted_pose = self.get_mean_pose(pose)
 		new_pos = Point(weighted_pose[0], weighted_pose[1], weighted_pose[2])
 		new_or = Quaternion(weighted_pose[3], weighted_pose[4], weighted_pose[5], weighted_pose[6])
@@ -327,4 +438,9 @@ class EstimatePose:
 		self.cluster_size = self.kmeans.X1[np.where(self.kmeans.cluster_idx==self.kmeans.max_idx)].shape[0]
 
 		# Return estimated pose
+		return pose
+
+	def estimate_pose_dbscan(self, data, weights):
+		self.dbscan = DBScan(data, weights, eps=0.5, minPts=3)
+		pose = self.dbscan.max_density_cluster_pose
 		return pose
