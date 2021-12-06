@@ -10,6 +10,7 @@ class NavigationStack():
 		self.client = actionlib.SimpleActionClient('/move_base', MoveBaseAction)
 		rospy.loginfo("Waiting for move base server")
 		self.client.wait_for_server()
+		self.path = 0
 		self.rest_point = [-1.9504327774047852, -4.748626708984375, 0, 0, 0, -0.7032243532516592, 0.7109680084179495]
 		self.landmarks = [[1.4473416805267334, 0.41364067792892456, 0.0, 0.0, 0.0, -0.011503674603633503, 0.9999338305461085],
 							[1.0017170906066895, -1.3638901710510254, 0.0, 0.0, 0.0, 0.010521600528978107, 0.9999446464291454],
@@ -19,6 +20,7 @@ class NavigationStack():
 							[1.5627377033233643, -8.728625297546387, 0.0, 0.0, 0.0, -0.02648123511897974, 0.9996493106017597]]
 		while not rospy.has_param('aruco_operation'):
 			print("WAITING FOR ARUCO TO SET PARAM")
+		self.sync_count = 0
 		self.process()
 
 	def return_goal(self, landmark):
@@ -40,19 +42,17 @@ class NavigationStack():
 			self.client.send_goal(rest_goal)
 			self.client.wait_for_result()
 			print("REST POINT REACHED")
-			time.sleep(3)     	
+			time.sleep(5)     	
 
 			goal = self.return_goal(landmark)	# Go to 1st landmark
 			self.client.send_goal(goal)
 			self.client.wait_for_result()
-			time.sleep(2)
 			rospy.set_param('path_id', i+1)
+			time.sleep(5)
 			print("GOAL {} REACHED".format(i))
-			print(rospy.get_param('aruco_operation'))
-			while rospy.get_param('aruco_operation') == 1:
+			while (not rospy.is_shutdown()) and (rospy.get_param('aruco_operation') == 1):
 				print("WAITING FOR ARUCO TO SET PARAM")
 			print("ARUCO OPERATION COMPLETED")
-			time.sleep(3)
 
 			
 

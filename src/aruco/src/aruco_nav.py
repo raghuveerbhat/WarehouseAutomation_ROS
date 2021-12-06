@@ -60,19 +60,16 @@ class ArucoNav():
             control_command = Twist()
             if abs(angle_error) > self.thresh:
                 angle_error = np.deg2rad(angle_error)
-                print(self.kP * angle_error)
                 control_command.angular.z = self.kP * angle_error
                 self.control_pub.publish(control_command)
             else:
+                rospy.set_param('aruco_operation', 0)
+                path_id = rospy.set_param('/path_id', 0)
                 control_command.angular.x = 0
                 control_command.angular.y = 0
                 control_command.angular.z = 0
-                self.control_pub.publish(control_command)
-                self.control_pub.publish(control_command)
-                self.control_pub.publish(control_command)
-                time.sleep(1)
-                rospy.set_param('aruco_operation', 0)
-                path_id = rospy.set_param('/path_id', 0)
+                for i in range(10):
+                    self.control_pub.publish(control_command)
                 print("COMPLETED ARUCO OPERATION")
 
     def corner_fix(self, corner):

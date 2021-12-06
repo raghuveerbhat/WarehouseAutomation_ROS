@@ -24,17 +24,17 @@ from copy import deepcopy
 class ParticleFilterLocalisationNode(object):
     def __init__(self):
         # ----- Minimum change (m/radians) before publishing new particle cloud and pose
-        self._PUBLISH_DELTA = rospy.get_param("publish_delta", 0.1)
+        self._PUBLISH_DELTA = rospy.get_param("publish_delta", 0.05)
 
         self._latest_scan = None
         self._last_published_pose = None
         self._initial_pose_received = False
 
-        self._pose_publisher = rospy.Publisher("/estimatedpose", PoseStamped, queue_size=5)
+        self._pose_publisher = rospy.Publisher("/estimatedpose", PoseStamped, queue_size=10)
         self._amcl_pose_publisher = rospy.Publisher("/amcl_pose",
-                                                    PoseWithCovarianceStamped)
-        self._cloud_publisher = rospy.Publisher("/particlecloud", PoseArray)
-        self._tf_publisher = rospy.Publisher("/tf", tfMessage, queue_size=5)
+                                                    PoseWithCovarianceStamped, queue_size=10)
+        self._cloud_publisher = rospy.Publisher("/particlecloud", PoseArray, queue_size=10)
+        self._tf_publisher = rospy.Publisher("/tf", tfMessage, queue_size=10)
 
         rospy.loginfo("Waiting for a map...")
         try:
@@ -51,13 +51,14 @@ class ParticleFilterLocalisationNode(object):
 
         self._laser_subscriber = rospy.Subscriber("/scan", LaserScan,
                                                   self._laser_callback,
-                                                  queue_size=1)
+                                                  queue_size=10)
         self._initial_pose_subscriber = rospy.Subscriber("/initialpose",
                                                          PoseWithCovarianceStamped,
-                                                         self._initial_pose_callback)
+                                                         self._initial_pose_callback,
+                                                         queue_size=10)
         self._odometry_subscriber = rospy.Subscriber("/odom", Odometry,
                                                      self._odometry_callback,
-                                                     queue_size=1)
+                                                     queue_size=10)
 
     def _initial_pose_callback(self, pose):
         """ called when RViz sends a user supplied initial pose estimate """
