@@ -68,7 +68,7 @@ class ArucoNav():
                 control_command.angular.x = 0
                 control_command.angular.y = 0
                 control_command.angular.z = 0
-                for i in range(10):
+                for i in range(50):
                     self.control_pub.publish(control_command)
                 print("COMPLETED ARUCO OPERATION")
 

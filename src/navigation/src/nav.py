@@ -37,6 +37,7 @@ class NavigationStack():
 		return goal
 
 	def process(self):
+		time.sleep(5)
 		for i, landmark in enumerate(self.landmarks):
 			rospy.set_param('path_id', 0)
 			rest_goal = self.return_goal(self.rest_point)	# Go to rest point 
@@ -53,8 +54,8 @@ class NavigationStack():
 			print("GOAL {} REACHED".format(i))
 			while (not rospy.is_shutdown()) and (rospy.get_param('aruco_operation') == 1):
 				print("WAITING FOR ARUCO TO SET PARAM")
-			rospy.set_param('completed', True)
 			print("ARUCO OPERATION COMPLETED")
+		rospy.set_param('completed', True)
 
 			
 
