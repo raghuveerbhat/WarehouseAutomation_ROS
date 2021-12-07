@@ -7,6 +7,7 @@ from nav_msgs.msg import Odometry
 import matplotlib.pyplot as plt
 from tf.transformations import  euler_from_quaternion
 import numpy as np
+import time
 
 class ParticleFilterLocalisationNodeEval(object):
     def __init__(self):
@@ -34,6 +35,7 @@ class ParticleFilterLocalisationNodeEval(object):
         self.Orientation_error5 = []
         self.pose_error6 = []
         self.Orientation_error6 = []
+        self.start_time=0
 
         self.interval = []
         self.groundtruthList = []
@@ -50,13 +52,15 @@ class ParticleFilterLocalisationNodeEval(object):
     
 
     def main_process(self):
+        self.start_time = time.time() 
         while(rospy.has_param('/completed') and rospy.has_param('/path_id')):
             completed = rospy.get_param('/completed')
             path_id = rospy.get_param('/path_id')
             print(completed)
             print(path_id)
 
-            if (completed == False):                
+            if (completed == False): 
+                              
                 self.counter = self.counter+1
                 rospy.sleep(1.0)
                 self.estimatedPose = None
@@ -129,7 +133,8 @@ class ParticleFilterLocalisationNodeEval(object):
         self.save_data(self.pose_error6,self.Orientation_error6,"6")
         self.save_data(self.pose_error,self.Orientation_error,"")
         self.save_graph(self.pose_error,self.Orientation_error,"")
-
+        with open(self.path_for_data_save+'/time_taken.npy', 'wb') as f:
+            np.save(f, time.time()-self.start_time)
         
     
     def save_data(self,perror,oerror,flag):
@@ -143,7 +148,7 @@ class ParticleFilterLocalisationNodeEval(object):
     def save_graph(self,perror,oerror,flag):
         plt.figure()
         plt.errorbar(self.interval,perror,fmt='b-',label="pose_error")
-        plt.xlabel('Time Interval (in seconds)')
+        plt.xlabel('Interval per iteration')
         plt.ylabel('RMS Error')
         plt.tight_layout()
         plt.legend()
@@ -152,7 +157,7 @@ class ParticleFilterLocalisationNodeEval(object):
         plt.show()
         plt.figure()
         plt.errorbar(self.interval,oerror,fmt='r-',label="Orientation_error")
-        plt.xlabel('Time Interval (in seconds)')
+        plt.xlabel('Interval per iteration')
         plt.ylabel('RMS Error')
         plt.tight_layout()
         plt.legend()
