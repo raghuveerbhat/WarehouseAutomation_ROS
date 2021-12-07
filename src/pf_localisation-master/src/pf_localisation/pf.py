@@ -383,11 +383,27 @@ class EstimatePose:
 			pose = self.estimate_pose_kmeans(data, weights)
 		elif self.method=='dbscan':
 			pose = self.estimate_pose_dbscan(data, weights)	
+		elif self.method == 'maxWeight':
+			pose = self.estimate_pose_maxWeight(data,weights)
 		weighted_pose = self.get_mean_pose(pose)
 		new_pos = Point(weighted_pose[0], weighted_pose[1], weighted_pose[2])
 		new_or = Quaternion(weighted_pose[3], weighted_pose[4], weighted_pose[5], weighted_pose[6])
 		estimated_pose = Pose(new_pos, new_or)
 		return estimated_pose
+
+	def estimate_pose_maxWeight(self, data, weights):
+		"""
+		This should calculate and return an updated robot pose estimate based
+		on the particle cloud (self.particlecloud).
+
+		This module finds the particle which has heighest weight and return its
+		pose as estimates pose
+
+		:Return:
+			| (geometry_msgs.msg.Pose) robot's estimated pose.
+		"""
+		pose = data[np.where(weights == max(weights))[0]]
+		return pose[0]
 
 	def estimate_pose_weighted(self, data, weights):
 		"""
