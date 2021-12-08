@@ -12,7 +12,7 @@
 "num_particles": 120,
 "min_particles": 100,
 "max_particles": 120,
-"random_pts_pct": 3,
+"random_pts_pct": 5,
 "augmented_mcl_aug_alpha_slow":0.3,
 "augmented_mcl_aug_alpha_fast":0.7,
 
