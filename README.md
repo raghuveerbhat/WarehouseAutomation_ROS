@@ -1,5 +1,4 @@
-# Intelligent Robotics Final Project - Warehouse Automation
-### Group 5
+# Intelligent Robotics - Warehouse Automation
 
 ### Project environment setup instructions
 
